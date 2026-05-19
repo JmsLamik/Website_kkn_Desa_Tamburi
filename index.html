@@ -1,0 +1,3642 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KKN Kelompok Desa Tamburi</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts (Inter & Playfair Display) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .font-serif {
+        font-family: "Playfair Display", serif;
+      }
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+        max-height: 350px;
+      }
+      .nav-active {
+        border-bottom: 3px solid #d97706;
+        color: #d97706 !important;
+        font-weight: 700;
+      }
+      .fade-in {
+        animation: fadeIn 0.4s ease-in-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-[#fdfcf9] text-slate-800 min-h-screen flex flex-col">
+    <!-- Chosen Palette: Warm Savanna & Ocean Teal (bg-[#fdfcf9], text-slate-800, amber-600, teal-900). -->
+    <!-- Application Structure Plan: Website ini dirancang dengan struktur Single-Page Application (SPA) berbasis tab navigasi dinamis (Beranda, Profil Desa, 16 Sahabat, Program Kerja, Sistem Desa, Galeri). Menu Sistem Desa kini dirancang menggunakan struktur modular ubin (grid) interaktif bershadow tipis dengan pembatas estetik. User harus mengklik salah satu menu layanan terlebih dahulu sebelum diarahkan langsung ke detail formulir/halaman masing-masing secara instan dan dinamis menggunakan Vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- CUSTOM BANNER ALERT / NOTIFIKASI -->
+    <div
+      id="alertBanner"
+      class="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-teal-900 text-white border border-teal-700 px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 hidden transition-all"
+    >
+      <span id="alertIcon">📢</span>
+      <span id="alertMessage" class="text-sm font-semibold"
+        >Notifikasi sistem desa.</span
+      >
+      <button
+        onclick="closeAlert()"
+        class="text-teal-300 hover:text-white font-bold text-lg"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- INITIAL AUTH SCREEN (LOGIN & REGISTER) -->
+    <div
+      id="authScreen"
+      class="fixed inset-0 bg-teal-950/40 backdrop-blur-md z-[100] flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-stone-100 p-8 fade-in"
+      >
+        <div class="text-center mb-6">
+          <h2 class="text-3xl font-bold font-serif text-teal-950">
+            KKN KELOMPOK 10
+          </h2>
+          <p class="text-sm text-slate-500 mt-1">
+            Silakan masuk untuk menjelajahi portal pengabdian
+          </p>
+        </div>
+
+        <!-- Login Panel -->
+        <div id="loginPanel" class="space-y-4">
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"
+              >Username</label
+            >
+            <input
+              type="text"
+              id="loginUser"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700"
+              placeholder="Masukkan username..."
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"
+              >Password</label
+            >
+            <input
+              type="password"
+              id="loginPass"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700"
+              placeholder="Masukkan password..."
+            />
+          </div>
+          <button
+            onclick="handleLogin()"
+            class="w-full bg-teal-900 hover:bg-teal-800 text-white font-semibold py-3 rounded-xl transition-all shadow-md mt-2"
+          >
+            Masuk Ke Portal
+          </button>
+          <div class="text-center text-xs text-slate-500 mt-4">
+            Belum punya akun?
+            <button
+              onclick="toggleAuthPanel('register')"
+              class="text-amber-600 font-bold hover:underline"
+            >
+              Daftar Sekarang
+            </button>
+          </div>
+          <div class="border-t border-slate-100 pt-4 text-center">
+            <p class="text-[10px] text-slate-400">
+              Akun default tamu: <strong>user</strong> /
+              <strong>user123</strong>
+            </p>
+            <p class="text-[10px] text-slate-400">
+              Akun default admin: <strong>admin</strong> /
+              <strong>admin123</strong>
+            </p>
+          </div>
+        </div>
+
+        <!-- Register Panel -->
+        <div id="registerPanel" class="space-y-4 hidden">
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"
+              >Username Baru</label
+            >
+            <input
+              type="text"
+              id="regUser"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700"
+              placeholder="Buat username..."
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"
+              >Password Baru</label
+            >
+            <input
+              type="password"
+              id="regPass"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700"
+              placeholder="Buat password..."
+            />
+          </div>
+          <button
+            onclick="handleRegister()"
+            class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 rounded-xl transition-all shadow-md mt-2"
+          >
+            Daftar Akun Baru
+          </button>
+          <div class="text-center text-xs text-slate-500 mt-4">
+            Sudah memiliki akun?
+            <button
+              onclick="toggleAuthPanel('login')"
+              class="text-teal-800 font-bold hover:underline"
+            >
+              Silakan Login
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="mainApp" class="flex flex-col min-h-screen hidden">
+      <!-- NAVIGATION HEADER -->
+      <header class="bg-teal-950 text-white shadow-md sticky top-0 z-50">
+        <div
+          class="container mx-auto px-4 py-4 flex flex-col lg:flex-row justify-between items-center gap-4"
+        >
+          <div class="text-center lg:text-left">
+            <h1
+              class="text-xl md:text-2xl font-bold font-serif tracking-wide text-amber-500"
+            >
+              KKN KELOMPOK TAMBURI
+            </h1>
+            <p class="text-xs text-teal-200 uppercase tracking-widest mt-0.5">
+              Kecamatan Rindi, Sumba Timur
+            </p>
+          </div>
+          <nav class="flex gap-1 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0">
+            <button
+              onclick="switchTab('beranda')"
+              id="nav-beranda"
+              class="nav-btn nav-active px-3 py-2 text-sm whitespace-nowrap transition-all hover:text-amber-400"
+            >
+              Beranda
+            </button>
+            <button
+              onclick="switchTab('desa')"
+              id="nav-desa"
+              class="nav-btn px-3 py-2 text-sm text-teal-100 whitespace-nowrap transition-all hover:text-amber-400"
+            >
+              Profil Desa
+            </button>
+            <button
+              onclick="switchTab('sahabat')"
+              id="nav-sahabat"
+              class="nav-btn px-3 py-2 text-sm text-teal-100 whitespace-nowrap transition-all hover:text-amber-400"
+            >
+              Anggota Kelompok
+            </button>
+            <button
+              onclick="switchTab('proker')"
+              id="nav-proker"
+              class="nav-btn px-3 py-2 text-sm text-teal-100 whitespace-nowrap transition-all hover:text-amber-400"
+            >
+              Program Kerja
+            </button>
+            <button
+              onclick="switchTab('sistem-desa')"
+              id="nav-sistem-desa"
+              class="nav-btn px-3 py-2 text-sm text-teal-100 whitespace-nowrap transition-all hover:text-amber-400"
+            >
+              Sistem Desa
+            </button>
+            <button
+              onclick="switchTab('galeri')"
+              id="nav-galeri"
+              class="nav-btn px-3 py-2 text-sm text-teal-100 whitespace-nowrap transition-all hover:text-amber-400"
+            >
+              Galeri
+            </button>
+          </nav>
+          <div class="flex items-center gap-3">
+            <span
+              id="badgeAdmin"
+              class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-full hidden"
+              >ADMIN MODE</span
+            >
+            <button
+              id="btnAdminLogin"
+              onclick="openAdminAuth()"
+              class="bg-amber-500 hover:bg-amber-600 text-teal-950 font-bold text-xs px-3 py-2 rounded-xl transition-all"
+            >
+              Login Admin
+            </button>
+            <button
+              onclick="handleLogout()"
+              class="bg-teal-900 hover:bg-teal-800 text-teal-200 hover:text-white font-bold text-xs px-3 py-2 rounded-xl transition-all"
+            >
+              Keluar
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT AREA -->
+      <main class="container mx-auto px-4 py-8 flex-grow">
+        <!-- TAB 1: BERANDA -->
+        <section id="beranda" class="tab-content fade-in block">
+          <div
+            class="bg-white rounded-3xl p-6 md:p-12 shadow-sm border border-stone-100 mb-8"
+          >
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <span
+                  class="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider mb-4"
+                  >Laporan Portofolio KKN 2026</span
+                >
+                <h2
+                  class="text-3xl md:text-5xl font-bold font-serif text-teal-950 leading-tight mb-4"
+                >
+                  Mengabdi dengan Hati, Menginspirasi dengan Aksi
+                </h2>
+                <div class="h-1 w-20 bg-amber-500 rounded mb-6"></div>
+                <p class="text-slate-600 leading-relaxed mb-6">
+                  Selamat datang di portal informasi resmi KKN Reguler Kelompok
+                  10 di Desa Tamburi, Sumba Timur. Melalui platform interaktif
+                  ini, kami mendokumentasikan seluruh rangkaian program kerja,
+                  profil kontribusi 16 anggota mahasiswa, serta analisis
+                  demografi yang dirancang khusus untuk mewujudkan pembangunan
+                  berkelanjutan.
+                </p>
+                <div class="flex flex-wrap gap-3">
+                  <button
+                    onclick="switchTab('sahabat')"
+                    class="bg-teal-900 hover:bg-teal-800 text-white font-semibold px-6 py-3 rounded-xl transition-all"
+                  >
+                    Kenali Anggota Kelompok
+                  </button>
+                  <button
+                    onclick="switchTab('desa')"
+                    class="bg-amber-500 hover:bg-amber-600 text-white font-semibold px-6 py-3 rounded-xl transition-all"
+                  >
+                    Jelajahi Potensi Desa
+                  </button>
+                </div>
+              </div>
+              <div class="relative">
+                <div
+                  class="bg-stone-100 rounded-2xl overflow-hidden shadow-lg border-4 border-white p-2"
+                >
+                  <img
+                    src="images/foto.jpeg"
+                    alt="Foto Bersama Kelompok KKN 10"
+                    class="w-full h-auto object-cover rounded-xl"
+                    onerror="this.src='https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&q=80&w=800'"
+                  />
+                </div>
+                <div
+                  class="absolute -bottom-4 -right-4 bg-amber-500 text-white p-4 rounded-xl shadow-md hidden sm:block"
+                >
+                  <p class="text-xs font-bold uppercase tracking-wider">
+                    Lokasi Pengabdian
+                  </p>
+                  <p class="font-serif font-semibold text-lg">
+                    Desa Tamburi, Rindi
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- QUICK STATISTICS -->
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          >
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4"
+            >
+              <div class="text-3xl p-3 bg-amber-50 text-amber-600 rounded-xl">
+                👥
+              </div>
+              <div>
+                <p
+                  id="statMembersCount"
+                  class="text-2xl font-extrabold text-teal-950 font-serif"
+                >
+                  16
+                </p>
+                <p
+                  class="text-xs text-slate-500 font-bold uppercase tracking-wider"
+                >
+                  Anggota Aktif
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4"
+            >
+              <div class="text-3xl p-3 bg-teal-50 text-teal-700 rounded-xl">
+                🎓
+              </div>
+              <div>
+                <p class="text-2xl font-extrabold text-teal-950 font-serif">
+                  5
+                </p>
+                <p
+                  class="text-xs text-slate-500 font-bold uppercase tracking-wider"
+                >
+                  Fokus Ilmu
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4"
+            >
+              <div class="text-3xl p-3 bg-amber-50 text-amber-600 rounded-xl">
+                🛠️
+              </div>
+              <div>
+                <p
+                  id="statProkerCount"
+                  class="text-2xl font-extrabold text-teal-950 font-serif"
+                >
+                  6
+                </p>
+                <p
+                  class="text-xs text-slate-500 font-bold uppercase tracking-wider"
+                >
+                  Proker Utama
+                </p>
+              </div>
+            </div>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex items-center gap-4"
+            >
+              <div class="text-3xl p-3 bg-teal-50 text-teal-700 rounded-xl">
+                🏡
+              </div>
+              <div>
+                <p class="text-2xl font-extrabold text-teal-950 font-serif">
+                  10
+                </p>
+                <p
+                  class="text-xs text-slate-500 font-bold uppercase tracking-wider"
+                >
+                  Nomor Kelompok
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: PROFIL DESA -->
+        <section id="desa" class="tab-content fade-in hidden">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold font-serif text-teal-950 mb-2">
+              Profil & Potensi Desa Tamburi
+            </h2>
+            <p class="text-slate-600 text-lg">
+              Mengenal struktur adat, sejarah, sistem pemerintahan, dan potensi
+              strategis wilayah Desa Tamburi.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- INFORMASI SEJARAH & VISI MISI -->
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col justify-between space-y-6"
+            >
+              <div>
+                <h3 class="text-xl font-bold text-teal-900 font-serif mb-2">
+                  Asal-Usul & Sejarah Desa
+                </h3>
+                <p class="text-slate-600 leading-relaxed text-sm">
+                  Nama "Tamburi" secara lisan dipercaya berasal dari bunyi alat
+                  musik tiup kerang tradisional (Tamburi) yang dahulu digunakan
+                  oleh para leluhur Rindi untuk mengumpulkan warga di padang
+                  sabana. Desa ini didirikan atas asas kekeluargaan adat yang
+                  kental dan secara administratif menjadi bagian vital dari
+                  Kecamatan Rindi, Sumba Timur.
+                </p>
+              </div>
+              <div class="border-t border-slate-100 pt-4">
+                <h3 class="text-lg font-bold text-teal-900 font-serif mb-2">
+                  Visi & Misi Desa
+                </h3>
+                <p class="text-slate-700 font-semibold italic text-xs mb-2">
+                  "Mewujudkan Desa Tamburi yang mandiri, berdaulat secara
+                  ekonomi berbasis tani-ternak, serta luhur dalam menjaga adat
+                  istiadat Sumba."
+                </p>
+                <ul
+                  class="list-disc list-inside text-xs text-slate-600 space-y-1"
+                >
+                  <li>
+                    Meningkatkan kapasitas digitalisasi administrasi kelurahan.
+                  </li>
+                  <li>
+                    Mendorong hilirisasi kerajinan Tenun Rindi ke pasar global.
+                  </li>
+                  <li>
+                    Memperkuat swasembada pakan hijau ternak sapi dan kuda.
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- PETA SEKTOR & LOKASI -->
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col justify-between"
+            >
+              <div>
+                <h3 class="text-xl font-bold text-teal-900 font-serif mb-2">
+                  Peta & Sektor Strategis Wilayah
+                </h3>
+                <p class="text-slate-600 leading-relaxed text-sm mb-4">
+                  Sektor penunjang utama kehidupan masyarakat Desa Tamburi
+                  didominasi oleh pertanian jagung, peternakan Kuda Sandalwood,
+                  Sapi Ongole, serta industri kreatif rumahan Tenun Ikat Sumba
+                  pewarna alami.
+                </p>
+              </div>
+              <div
+                class="w-full h-56 rounded-xl overflow-hidden border border-stone-200"
+              >
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d125740.16933591965!2d120.5756314!3d-9.9856114!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2c4addbe67d3df47%3A0xe549ebfa8ea265e3!2sRindi%2C%20Kabupaten%20Sumba%20Timur%2C%20Nusa%20Tenggara%20Timur!5e0!3m2!1sid!2sid!4v1700000000000!5m2!1sid!2sid"
+                  width="100%"
+                  height="100%"
+                  style="border: 0"
+                  allowfullscreen=""
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
+          </div>
+
+          <!-- STRUKTUR PEMERINTAHAN DESA -->
+          <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 mb-8"
+          >
+            <h3
+              class="text-xl font-bold text-teal-900 font-serif mb-4 text-center"
+            >
+              Struktur Pemerintahan Desa Tamburi
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+              <div class="p-4 bg-teal-50 rounded-xl border border-teal-100">
+                <p class="text-xs text-slate-500 font-bold uppercase mb-1">
+                  Kepala Desa
+                </p>
+                <p class="text-sm font-bold text-teal-950">
+                  Umbu Ndahawali, S.Sos
+                </p>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p class="text-xs text-slate-500 font-bold uppercase mb-1">
+                  Sekretaris Desa
+                </p>
+                <p class="text-sm font-semibold text-slate-800">
+                  Rambu Kalara, S.E
+                </p>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p class="text-xs text-slate-500 font-bold uppercase mb-1">
+                  DPL KKN K-10
+                </p>
+                <p class="text-sm font-semibold text-slate-800">
+                  Yuvensius Ramompas, M.Sc
+                </p>
+              </div>
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p class="text-xs text-slate-500 font-bold uppercase mb-1">
+                  Ketua Adat (Wunang)
+                </p>
+                <p class="text-sm font-semibold text-slate-800">
+                  Umbu Mbora Kaniri
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: 16 SAHABAT -->
+        <section id="sahabat" class="tab-content fade-in hidden">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold font-serif text-teal-950 mb-2">
+              Profil Anggota Kelompok 10
+            </h2>
+            <p class="text-slate-600 text-lg">
+              Kapasitas akademik, sebaran disiplin ilmu, serta visualisasi
+              profil dari ke-16 mahasiswa pengabdi.
+            </p>
+          </div>
+
+          <!-- ANALYTICS DASHBOARD (MOVED FROM VILLAGE TAB) -->
+          <div
+            class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 mb-8"
+          >
+            <h3
+              class="text-xl font-bold text-teal-900 font-serif mb-4 text-center"
+            >
+              Analisis Kapasitas & Sebaran Tim
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <h4
+                  class="text-xs font-bold text-slate-500 uppercase tracking-wider text-center mb-2"
+                >
+                  Sebaran Jurusan Mahasiswa
+                </h4>
+                <div class="chart-container">
+                  <canvas id="prodiChart"></canvas>
+                </div>
+              </div>
+              <div>
+                <h4
+                  class="text-xs font-bold text-slate-500 uppercase tracking-wider text-center mb-2"
+                >
+                  Rasio Representasi Gender
+                </h4>
+                <div class="chart-container">
+                  <canvas id="genderChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SEARCH AND FILTER INTERACTION -->
+          <div
+            class="bg-white p-4 rounded-2xl shadow-sm border border-stone-100 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center"
+          >
+            <div class="relative w-full md:w-96">
+              <input
+                type="text"
+                id="memberSearch"
+                onkeyup="searchAndFilterMembers()"
+                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-700"
+                placeholder="Cari nama teman kelompok..."
+              />
+            </div>
+            <div
+              class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0"
+            >
+              <button
+                onclick="setFilter('all', this)"
+                class="filter-btn bg-teal-900 text-white font-semibold text-xs px-4 py-2.5 rounded-xl transition-all"
+              >
+                Semua
+              </button>
+              <button
+                onclick="setFilter('Manajemen', this)"
+                class="filter-btn bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all"
+              >
+                Manajemen
+              </button>
+              <button
+                onclick="setFilter('Pendidikan', this)"
+                class="filter-btn bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all"
+              >
+                Pendidikan
+              </button>
+              <button
+                onclick="setFilter('Hukum', this)"
+                class="filter-btn bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all"
+              >
+                Hukum
+              </button>
+              <button
+                onclick="setFilter('Informatika', this)"
+                class="filter-btn bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all"
+              >
+                Informatika
+              </button>
+              <button
+                onclick="setFilter('Sains', this)"
+                class="filter-btn bg-slate-100 text-slate-700 font-semibold text-xs px-4 py-2.5 rounded-xl transition-all"
+              >
+                Sains & Agro-Ternak
+              </button>
+            </div>
+            <button
+              id="adminAddMemberBtn"
+              onclick="openAddMemberModal()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all hidden"
+            >
+              <i class="fa-solid fa-plus mr-1"></i>Tambah Anggota
+            </button>
+          </div>
+
+          <!-- MEMBERS GRID -->
+          <div
+            id="membersGrid"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+          >
+            <!-- Di-render dinamis oleh JavaScript -->
+          </div>
+        </section>
+
+        <!-- TAB 4: PROGRAM KERJA -->
+        <section id="proker" class="tab-content fade-in hidden">
+          <div class="mb-8 flex justify-between items-center">
+            <div>
+              <h2 class="text-3xl font-bold font-serif text-teal-950 mb-2">
+                Program Kerja Lintas Disiplin
+              </h2>
+              <p class="text-slate-600 text-lg">
+                Penyusunan rencana aksi kerja nyata dirancang secara kolaboratif
+                guna menjawab berbagai macam problematika kritis di Desa
+                Tamburi.
+              </p>
+            </div>
+            <button
+              id="adminAddProkerBtn"
+              onclick="openAddProkerModal()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all hidden"
+            >
+              <i class="fa-solid fa-plus mr-1"></i>Tambah Proker
+            </button>
+          </div>
+
+          <div
+            id="prokerGrid"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <!-- Di-render dinamis oleh JavaScript -->
+          </div>
+        </section>
+
+        <!-- TAB 5: SISTEM DESA -->
+        <section id="sistem-desa" class="tab-content fade-in hidden">
+          <div
+            class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4"
+          >
+            <div>
+              <h2 class="text-3xl font-bold font-serif text-teal-950 mb-2">
+                Sistem Layanan & Administrasi Desa Tamburi
+              </h2>
+              <p class="text-slate-600 text-lg font-medium">
+                Layanan portal digital interaktif untuk administrasi warga,
+                transparansi pembangunan, dan wadah pengaduan.
+              </p>
+            </div>
+            <div class="flex gap-2">
+              <button
+                id="adminEditPendudukBtn"
+                onclick="openEditPendudukModal()"
+                class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all hidden"
+              >
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Data
+                Penduduk
+              </button>
+              <button
+                id="adminAddBeritaBtn"
+                onclick="openAddBeritaModal()"
+                class="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all hidden"
+              >
+                <i class="fa-solid fa-plus mr-1"></i> Tambah Berita/Pengumuman
+              </button>
+            </div>
+          </div>
+
+          <!-- MENU SELECTION DASHBOARD GRID -->
+          <div
+            id="sistemDesaMenu"
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <!-- Card 1: Layanan Surat Online -->
+            <div
+              onclick="showSistemDesaSubPage('subPageSurat')"
+              class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:border-teal-700 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div class="text-3xl mb-4">📨</div>
+                <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">
+                  Layanan Surat Online
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Pengajuan Surat Pengantar, Surat Domisili, SKU, SKTM, hingga
+                  Surat Kematian secara mandiri dari rumah.
+                </p>
+              </div>
+              <div
+                class="text-xs font-semibold text-amber-600 mt-4 flex items-center gap-1"
+              >
+                Buka Layanan →
+              </div>
+            </div>
+
+            <!-- Card 2: Transparansi Anggaran & Pembangunan -->
+            <div
+              onclick="showSistemDesaSubPage('subPageKeuangan')"
+              class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:border-teal-700 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div class="text-3xl mb-4">💰</div>
+                <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">
+                  Transparansi Keuangan (APBDes)
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Informasi grafik realisasi pendapatan belanja desa serta
+                  laporan progres pembangunan fisik proyek desa.
+                </p>
+              </div>
+              <div
+                class="text-xs font-semibold text-amber-600 mt-4 flex items-center gap-1"
+              >
+                Buka Transparansi →
+              </div>
+            </div>
+
+            <!-- Card 3: Data Demografi Penduduk -->
+            <div
+              onclick="showSistemDesaSubPage('subPageKependudukan')"
+              class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:border-teal-700 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div class="text-3xl mb-4">📊</div>
+                <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">
+                  Demografi & Hub Darurat
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Akses data statistik kependudukan KK, Jiwa, rasio gender,
+                  profesi utama, serta daftar panggilan darurat.
+                </p>
+              </div>
+              <div
+                class="text-xs font-semibold text-amber-600 mt-4 flex items-center gap-1"
+              >
+                Lihat Statistik →
+              </div>
+            </div>
+
+            <!-- Card 4: Pengaduan & Aspirasi -->
+            <div
+              onclick="showSistemDesaSubPage('subPageAspirasi')"
+              class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:border-teal-700 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div class="text-3xl mb-4">🗣️</div>
+                <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">
+                  Pengaduan & Aspirasi Warga
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Kirim laporan fasilitas umum (seperti jalan rusak, lampu mati)
+                  atau sampaikan masukan langsung ke kantor desa.
+                </p>
+              </div>
+              <div
+                class="text-xs font-semibold text-amber-600 mt-4 flex items-center gap-1"
+              >
+                Kirim Aduan →
+              </div>
+            </div>
+
+            <!-- Card 5: Berita & Kabar Desa -->
+            <div
+              onclick="showSistemDesaSubPage('subPageBerita')"
+              class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm hover:shadow-md hover:border-teal-700 hover:-translate-y-1 transition-all cursor-pointer flex flex-col justify-between"
+            >
+              <div>
+                <div class="text-3xl mb-4">📰</div>
+                <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">
+                  Kabar, Pengumuman & Agenda
+                </h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  Dapatkan info terpercaya seputar pembagian BLT, jadwal
+                  posyandu, gotong royong, hingga festival adat desa.
+                </p>
+              </div>
+              <div
+                class="text-xs font-semibold text-amber-600 mt-4 flex items-center gap-1"
+              >
+                Buka Kabar Desa →
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB SECTIONS (Hidden by default, shown on click) -->
+
+          <!-- 1. SUB SEKSYEN: SURAT ONLINE -->
+          <div id="subPageSurat" class="hidden fade-in">
+            <button
+              onclick="goBackToSistemDesaMenu()"
+              class="mb-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition-all"
+            >
+              ← Kembali ke Menu Utama Layanan
+            </button>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <span class="text-2xl p-2 bg-teal-50 text-teal-700 rounded-lg"
+                  >📨</span
+                >
+                <h3 class="font-bold text-lg text-teal-950 font-serif">
+                  Pengajuan Surat Warga
+                </h3>
+              </div>
+              <p class="text-xs text-slate-500 mb-4">
+                Layanan pengajuan dokumen Surat Pengantar, Surat Domisili, atau
+                Surat Keterangan Usaha (SKU) secara instan.
+              </p>
+
+              <!-- Panduan Syarat Administratif -->
+              <div
+                class="mb-4 bg-amber-50/50 p-3 rounded-xl border border-amber-100 text-xs"
+              >
+                <p class="font-bold text-amber-800 mb-1">
+                  <i class="fa-solid fa-circle-info mr-1"></i> Syarat Utama
+                  Administrasi:
+                </p>
+                <ul class="list-disc list-inside space-y-1 text-slate-600">
+                  <li><strong>SKTM:</strong> Kartu Keluarga, KTP, Surat RT.</li>
+                  <li>
+                    <strong>SKU:</strong> KTP, Surat RT, Foto Lokasi Usaha.
+                  </li>
+                  <li><strong>Kematian:</strong> KTP Almarhum, KTP Pelapor.</li>
+                </ul>
+              </div>
+
+              <form
+                id="suratForm"
+                onsubmit="handleRequestLetter(event)"
+                class="space-y-3"
+              >
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      class="block text-[10px] font-bold text-slate-500 uppercase"
+                      >Nama Pengaju</label
+                    >
+                    <input
+                      type="text"
+                      id="suratNama"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-[10px] font-bold text-slate-500 uppercase"
+                      >NIK / No. Identitas</label
+                    >
+                    <input
+                      type="text"
+                      id="suratNik"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-[10px] font-bold text-slate-500 uppercase"
+                    >Jenis Surat</label
+                  >
+                  <select
+                    id="suratJenis"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                  >
+                    <option value="Surat Pengantar">Surat Pengantar</option>
+                    <option value="Surat Keterangan Domisili">
+                      Surat Keterangan Domisili
+                    </option>
+                    <option value="Surat Keterangan Usaha (SKU)">
+                      Surat Keterangan Usaha (SKU)
+                    </option>
+                    <option value="Surat Keterangan Tidak Mampu (SKTM)">
+                      Surat Keterangan Tidak Mampu (SKTM)
+                    </option>
+                    <option value="Surat Kematian">Surat Kematian</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  class="w-full bg-teal-900 hover:bg-teal-800 text-white font-bold text-xs py-2 rounded-lg transition-all mt-2"
+                >
+                  Kirim Pengajuan
+                </button>
+              </form>
+
+              <div class="mt-8 border-t border-slate-100 pt-6">
+                <h4
+                  class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
+                  Riwayat Pengajuan Anda
+                </h4>
+                <div
+                  id="listSuratRequests"
+                  class="space-y-2 max-h-60 overflow-y-auto text-xs"
+                >
+                  <!-- Diisi dinamis -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. SUB SEKSYEN: TRANSPARANSI & APBDES -->
+          <div id="subPageKeuangan" class="hidden fade-in">
+            <button
+              onclick="goBackToSistemDesaMenu()"
+              class="mb-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition-all"
+            >
+              ← Kembali ke Menu Utama Layanan
+            </button>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <!-- Visualisasi APBDes -->
+              <div
+                class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100"
+              >
+                <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">
+                  💰 Transparansi Realisasi APBDes (2026)
+                </h3>
+                <p class="text-xs text-slate-500 mb-4">
+                  Grafik pembagian realisasi belanja desa dari Dana Desa (DD)
+                  dan Alokasi Dana Desa (ADD) Tamburi.
+                </p>
+                <div class="h-64">
+                  <canvas id="apbdesChart"></canvas>
+                </div>
+              </div>
+              <!-- Laporan Pembangunan Infrastruktur -->
+              <div
+                class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col justify-between"
+              >
+                <div>
+                  <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">
+                    🏗️ Laporan Progres Pembangunan Desa
+                  </h3>
+                  <p class="text-xs text-slate-500 mb-4">
+                    Informasi proyek fisik infrastruktur desa Tamburi periode
+                    berjalan.
+                  </p>
+                  <div class="space-y-4">
+                    <div
+                      class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex gap-4 items-center"
+                    >
+                      <div
+                        class="w-16 h-16 rounded-lg bg-teal-900 text-white flex flex-col justify-center items-center font-bold text-[10px] text-center"
+                      >
+                        <span>JALAN</span>
+                        <span class="text-amber-400">95%</span>
+                      </div>
+                      <div class="text-xs flex-grow">
+                        <p class="font-bold text-slate-800 text-sm">
+                          Paving Blok & Rabat Beton Sabana
+                        </p>
+                        <p class="text-slate-500">
+                          Anggaran: Rp142.000.000 • Status: Finis
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex gap-4 items-center"
+                    >
+                      <div
+                        class="w-16 h-16 rounded-lg bg-teal-900 text-white flex flex-col justify-center items-center font-bold text-[10px] text-center"
+                      >
+                        <span>AIR</span>
+                        <span class="text-amber-400">70%</span>
+                      </div>
+                      <div class="text-xs flex-grow">
+                        <p class="font-bold text-slate-800 text-sm">
+                          Saluran Irigasi Tersier Sawah
+                        </p>
+                        <p class="text-slate-500">
+                          Anggaran: Rp85.500.000 • Status: Pengerjaan
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 text-xs text-slate-400 italic">
+                  Sumber: Bidang Pemberdayaan Masyarakat Tamburi
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. SUB SEKSYEN: KEPENDUDUKAN & HUB DARURAT -->
+          <div id="subPageKependudukan" class="hidden fade-in">
+            <button
+              onclick="goBackToSistemDesaMenu()"
+              class="mb-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition-all"
+            >
+              ← Kembali ke Menu Utama Layanan
+            </button>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div
+                class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100"
+              >
+                <div class="flex items-center gap-3 mb-4">
+                  <span
+                    class="text-2xl p-2 bg-amber-50 text-amber-600 rounded-lg"
+                    >📊</span
+                  >
+                  <h3 class="font-bold text-lg text-teal-950 font-serif">
+                    Kependudukan & Pekerjaan
+                  </h3>
+                </div>
+                <p class="text-xs text-slate-500 mb-4">
+                  Struktur populasi terkini Desa Tamburi berdasarkan klasifikasi
+                  lapangan pekerjaan utama warga.
+                </p>
+
+                <div class="space-y-3 mb-6">
+                  <div
+                    class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100"
+                  >
+                    <span class="text-[11px] font-semibold text-slate-600"
+                      >Total KK</span
+                    >
+                    <span id="displayKK" class="font-bold text-teal-950 text-xs"
+                      >342 KK</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100"
+                  >
+                    <span class="text-[11px] font-semibold text-slate-600"
+                      >Total Jiwa</span
+                    >
+                    <span
+                      id="displayJiwa"
+                      class="font-bold text-teal-950 text-xs"
+                      >1.482 Jiwa</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100"
+                  >
+                    <span class="text-[11px] font-semibold text-slate-600"
+                      >Laki-Laki</span
+                    >
+                    <span
+                      id="displayLaki"
+                      class="font-bold text-teal-950 text-xs"
+                      >730 Jiwa</span
+                    >
+                  </div>
+                  <div
+                    class="flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border border-slate-100"
+                  >
+                    <span class="text-[11px] font-semibold text-slate-600"
+                      >Perempuan</span
+                    >
+                    <span
+                      id="displayPerempuan"
+                      class="font-bold text-teal-950 text-xs"
+                      >752 Jiwa</span
+                    >
+                  </div>
+                </div>
+
+                <h4
+                  class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
+                  Sektor Pekerjaan Warga
+                </h4>
+                <div class="h-40">
+                  <canvas id="pekerjaanChart"></canvas>
+                </div>
+              </div>
+
+              <!-- EMERGENCY CODES -->
+              <div
+                class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col justify-between"
+              >
+                <div>
+                  <h4
+                    class="text-xs font-bold text-red-600 uppercase tracking-wider mb-2"
+                  >
+                    <i class="fa-solid fa-phone-volume mr-1"></i> Kontak Darurat
+                    Desa
+                  </h4>
+                  <p class="text-xs text-slate-500 mb-4">
+                    Hubungi dinas darurat setempat secara instan jika mendapati
+                    masalah keamanan, kesehatan, atau kebakaran.
+                  </p>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="p-3 bg-red-50 text-red-800 rounded-lg">
+                      <p class="font-bold">Polsek Rindi</p>
+                      <p>0813-3920-xxxx</p>
+                    </div>
+                    <div class="p-3 bg-red-50 text-red-800 rounded-lg">
+                      <p class="font-bold">Puskesmas Rindi</p>
+                      <p>0821-4820-xxxx</p>
+                    </div>
+                    <div class="p-3 bg-red-50 text-red-800 rounded-lg">
+                      <p class="font-bold">Pemadam Sumba</p>
+                      <p>(0387) 61xxx</p>
+                    </div>
+                    <div class="p-3 bg-red-50 text-red-800 rounded-lg">
+                      <p class="font-bold">Kades Tamburi</p>
+                      <p>0852-3918-xxxx</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. SUB SEKSYEN: ASPIRASI / PENGADUAN -->
+          <div id="subPageAspirasi" class="hidden fade-in">
+            <button
+              onclick="goBackToSistemDesaMenu()"
+              class="mb-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition-all"
+            >
+              ← Kembali
+            </button>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100"
+            >
+              <div class="flex items-center gap-3 mb-4">
+                <span class="text-2xl p-2 bg-teal-50 text-teal-700 rounded-lg"
+                  >🗣️</span
+                >
+                <h3 class="font-bold text-lg text-teal-950 font-serif">
+                  Laporan Pengaduan & Aspirasi
+                </h3>
+              </div>
+              <p class="text-xs text-slate-500 mb-4">
+                Sampaikan kritik, saran, laporan jalan rusak, lampu mati, maupun
+                aspirasi lainnya langsung ke perangkat desa.
+              </p>
+
+              <form
+                id="aspirasiForm"
+                onsubmit="handleSubmitAspiration(event)"
+                class="space-y-3"
+              >
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      class="block text-[10px] font-bold text-slate-500 uppercase"
+                      >Nama Warga / Anonim</label
+                    >
+                    <input
+                      type="text"
+                      id="aspirasiNama"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-[10px] font-bold text-slate-500 uppercase"
+                      >Kategori Keluhan</label
+                    >
+                    <select
+                      id="aspirasiKategori"
+                      class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                    >
+                      <option value="Fasilitas Umum / Jalan">
+                        Fasilitas Umum / Jalan
+                      </option>
+                      <option value="Layanan Publik">Layanan Publik</option>
+                      <option value="Saran & Usulan">Saran & Usulan</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label
+                    class="block text-[10px] font-bold text-slate-500 uppercase"
+                    >Isi Laporan / Aspirasi</label
+                  >
+                  <textarea
+                    id="aspirasiIsi"
+                    rows="3"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none resize-none"
+                    required
+                    placeholder="Tulis masukan anda disini..."
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs py-2 rounded-lg transition-all mt-2"
+                >
+                  Kirim Laporan
+                </button>
+              </form>
+
+              <div class="mt-8 border-t border-slate-100 pt-6">
+                <h4
+                  class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"
+                >
+                  Daftar Pengaduan & Tindakan
+                </h4>
+                <div
+                  id="listAspirasi"
+                  class="space-y-2 max-h-60 overflow-y-auto text-xs"
+                >
+                  <!-- Diisi dinamis -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. SUB SEKSYEN: BERITA & PENGUMUMAN -->
+          <div id="subPageBerita" class="hidden fade-in">
+            <button
+              onclick="goBackToSistemDesaMenu()"
+              class="mb-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition-all"
+            >
+              ← Kembali ke Menu Utama Layanan
+            </button>
+            <div
+              class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100"
+            >
+              <h3
+                class="font-bold text-xl text-teal-950 font-serif mb-4 text-center"
+              >
+                📰 Berita, Pengumuman Penting & Agenda Desa
+              </h3>
+              <div
+                id="beritaGrid"
+                class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              >
+                <!-- Di-render dinamis oleh JavaScript -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 6: GALERI -->
+        <section id="galeri" class="tab-content fade-in hidden">
+          <div class="mb-8 flex justify-between items-center">
+            <div>
+              <h2 class="text-3xl font-bold font-serif text-teal-950 mb-2">
+                Galeri Dokumentasi Pengabdian
+              </h2>
+              <p class="text-slate-600 text-lg">
+                Merekam jejak kebersamaan, sinergi program kerja, dan kehangatan
+                tulus warga Desa Tamburi.
+              </p>
+            </div>
+            <button
+              id="adminAddGaleriBtn"
+              onclick="openAddGaleriModal()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all hidden"
+            >
+              <i class="fa-solid fa-plus mr-1"></i>Tambah Dokumentasi
+            </button>
+          </div>
+
+          <div
+            id="galeriGrid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <!-- Di-render dinamis oleh JavaScript -->
+          </div>
+        </section>
+      </main>
+
+      <!-- FOOTER -->
+      <footer
+        class="bg-teal-950 text-teal-100 py-8 border-t border-teal-900 mt-auto"
+      >
+        <div
+          class="container mx-auto px-4 text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-4"
+        >
+          <div>
+            <p class="font-serif font-bold text-lg text-white">
+              KKN DESA TAMBURI
+            </p>
+            <p class="text-xs text-teal-300 mt-1">
+              &copy; 2026 Pengabdian Masyarakat Sumba Timur. Semua Hak
+              Dilindungi.
+            </p>
+          </div>
+          <div class="text-xs text-teal-400">
+            Laporan interaktif ini didesain penuh kegigihan & kebanggaan.
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <!-- PROFILE MODAL DETAIL -->
+    <div
+      id="profileModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-stone-100 fade-in"
+      >
+        <div
+          class="bg-teal-900 text-white p-6 flex justify-between items-center"
+        >
+          <div>
+            <h3 id="modalName" class="text-xl font-bold font-serif">
+              Nama Anggota
+            </h3>
+            <p
+              id="modalProdi"
+              class="text-xs text-teal-200 font-semibold mt-0.5"
+            >
+              Program Studi
+            </p>
+          </div>
+          <button
+            onclick="closeModal()"
+            class="text-teal-200 hover:text-white text-2xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="p-6 space-y-3.5 max-h-[70vh] overflow-y-auto">
+          <div class="grid grid-cols-2 gap-3 flex justify-center">
+            <div class="col-span-2 flex justify-center mb-2">
+              <div
+                class="w-32 h-32 rounded-full overflow-hidden border-4 border-amber-500 shadow-md"
+              >
+                <img
+                  id="modalMemberImg"
+                  src=""
+                  alt="Foto Profil"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <span
+                class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"
+                >NIM</span
+              >
+              <span id="modalNim" class="text-sm font-semibold text-slate-800"
+                >-</span
+              >
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <span
+                class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"
+                >Daerah Asal</span
+              >
+              <span id="modalAsal" class="text-sm font-semibold text-slate-800"
+                >-</span
+              >
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <span
+                class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"
+                >Tanggal Lahir</span
+              >
+              <span id="modalLahir" class="text-sm font-semibold text-slate-800"
+                >-</span
+              >
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+              <span
+                class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"
+                >Umur (Kalkulasi JS)</span
+              >
+              <span id="modalUmur" class="text-sm font-bold text-amber-600"
+                >-</span
+              >
+            </div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+            <span
+              class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"
+              >Hobi Utama</span
+            >
+            <span id="modalHobi" class="text-sm font-semibold text-slate-800"
+              >-</span
+            >
+          </div>
+          <div class="pt-4 border-t border-slate-100 space-y-2">
+            <h4
+              class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2"
+            >
+              Tautan Sosial & Kontak
+            </h4>
+            <div class="flex flex-col gap-2">
+              <a
+                id="modalWa"
+                href="#"
+                target="_blank"
+                class="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-4 py-2.5 rounded-xl border border-emerald-100 transition-colors"
+              >
+                <span>🟢</span> <strong>WhatsApp:</strong>
+                <span id="modalWaVal">Hubungi</span>
+              </a>
+              <a
+                id="modalIg"
+                href="#"
+                target="_blank"
+                class="flex items-center gap-2 text-sm text-rose-600 hover:text-rose-700 bg-rose-50 px-4 py-2.5 rounded-xl border border-rose-100 transition-colors"
+              >
+                <span>📸</span> <strong>Instagram:</strong>
+                <span id="modalIgVal">Lihat Profil</span>
+              </a>
+              <a
+                id="modalFb"
+                href="#"
+                target="_blank"
+                class="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 bg-blue-50 px-4 py-2.5 rounded-xl border border-blue-100 transition-colors"
+              >
+                <span>📘</span> <strong>Facebook:</strong>
+                <span id="modalFbVal">Lihat Profil</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN AUTH MODAL -->
+    <div
+      id="adminAuthModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl border border-stone-100 fade-in"
+      >
+        <div
+          class="bg-red-700 text-white p-5 flex justify-between items-center"
+        >
+          <h3 class="text-lg font-bold font-serif">Autentikasi Admin</h3>
+          <button
+            onclick="closeAdminAuth()"
+            class="text-white text-2xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="p-6 space-y-4">
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"
+              >Username Admin</label
+            >
+            <input
+              type="text"
+              id="adminUser"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none"
+              placeholder="Masukkan username admin..."
+            />
+          </div>
+          <div>
+            <label
+              class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5"
+              >Password Admin</label
+            >
+            <input
+              type="password"
+              id="adminPass"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none"
+              placeholder="Masukkan password admin..."
+            />
+          </div>
+          <button
+            onclick="handleAdminLogin()"
+            class="w-full bg-red-700 hover:bg-red-800 text-white font-bold py-2.5 rounded-xl transition-all shadow-md"
+          >
+            Masuk Mode Admin
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT PENDUDUK MODAL (ADMIN) -->
+    <div
+      id="pendudukEditModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-stone-100 fade-in"
+      >
+        <div
+          class="bg-teal-900 text-white p-5 flex justify-between items-center"
+        >
+          <h3 class="text-lg font-bold font-serif">Edit Data Kependudukan</h3>
+          <button
+            onclick="closeEditPendudukModal()"
+            class="text-white text-2xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+        <form
+          id="pendudukForm"
+          onsubmit="savePendudukStats(event)"
+          class="p-6 space-y-4 max-h-[70vh] overflow-y-auto"
+        >
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Total KK</label
+              >
+              <input
+                type="number"
+                id="editTotalKK"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Total Jiwa</label
+              >
+              <input
+                type="number"
+                id="editTotalJiwa"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Laki-Laki</label
+              >
+              <input
+                type="number"
+                id="editLakiLaki"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Perempuan</label
+              >
+              <input
+                type="number"
+                id="editPerempuan"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+          <hr class="border-slate-100" />
+          <h4 class="text-xs font-bold text-teal-800 uppercase tracking-wider">
+            Persentase (%) Sektor Pekerjaan
+          </h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Petani (%)</label
+              >
+              <input
+                type="number"
+                id="editPctPetani"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+                min="0"
+                max="100"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Peternak (%)</label
+              >
+              <input
+                type="number"
+                id="editPctPeternak"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+                min="0"
+                max="100"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Penenun (%)</label
+              >
+              <input
+                type="number"
+                id="editPctPenenun"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+                min="0"
+                max="100"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >PNS/Perangkat (%)</label
+              >
+              <input
+                type="number"
+                id="editPctPNS"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+                min="0"
+                max="100"
+              />
+            </div>
+            <div class="col-span-2">
+              <label class="block text-xs font-bold text-slate-500"
+                >Lainnya (%)</label
+              >
+              <input
+                type="number"
+                id="editPctLainnya"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+                min="0"
+                max="100"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-teal-900 hover:bg-teal-800 text-white font-bold py-2.5 rounded-xl transition-all shadow-md mt-2"
+          >
+            Simpan Perubahan Data
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MEMBER CRUD MODAL (ADD & EDIT) -->
+    <div
+      id="memberCrudModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-stone-100 fade-in"
+      >
+        <div
+          class="bg-teal-900 text-white p-5 flex justify-between items-center"
+        >
+          <h3 id="memberCrudTitle" class="text-lg font-bold font-serif">
+            Tambah/Ubah Anggota
+          </h3>
+          <button
+            onclick="closeMemberCrudModal()"
+            class="text-white text-2xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+        <form
+          id="memberCrudForm"
+          onsubmit="saveMember(event)"
+          class="p-6 space-y-4 max-h-[75vh] overflow-y-auto"
+        >
+          <input type="hidden" id="crudMemberIdx" />
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Nama Lengkap</label
+              >
+              <input
+                type="text"
+                id="crudName"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500">NIM</label>
+              <input
+                type="text"
+                id="crudNim"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Program Studi</label
+              >
+              <input
+                type="text"
+                id="crudProdi"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Grup Filter (Kategori)</label
+              >
+              <select
+                id="crudGrup"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+              >
+                <option value="Manajemen">Manajemen</option>
+                <option value="Pendidikan">Pendidikan</option>
+                <option value="Hukum">Hukum</option>
+                <option value="Informatika">Informatika</option>
+                <option value="Sains">Sains & Agro-Ternak</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Jenis Kelamin (L/P)</label
+              >
+              <select
+                id="crudJk"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+              >
+                <option value="L">Laki-laki</option>
+                <option value="P">Perempuan</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Daerah Asal</label
+              >
+              <input
+                type="text"
+                id="crudAsal"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Tanggal Lahir (YYYY-MM-DD)</label
+              >
+              <input
+                type="date"
+                id="crudLahir"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Hobi Utama</label
+              >
+              <input
+                type="text"
+                id="crudHobi"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Telepon (628...)</label
+              >
+              <input
+                type="text"
+                id="crudTelp"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Peran KKN</label
+              >
+              <input
+                type="text"
+                id="crudPeran"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Instagram Username</label
+              >
+              <input
+                type="text"
+                id="crudIg"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-500"
+                >Facebook Name</label
+              >
+              <input
+                type="text"
+                id="crudFb"
+                class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >URL Foto Profil</label
+            >
+            <input
+              type="text"
+              id="crudImg"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+              placeholder="Masukkan link foto..."
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-teal-900 hover:bg-teal-800 text-white font-bold py-2.5 rounded-xl transition-all shadow-md"
+          >
+            Simpan Data Anggota
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- PROKER CRUD MODAL (ADD & EDIT) -->
+    <div
+      id="prokerCrudModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-stone-100 fade-in"
+      >
+        <div
+          class="bg-teal-900 text-white p-5 flex justify-between items-center"
+        >
+          <h3 id="prokerCrudTitle" class="text-lg font-bold font-serif">
+            Kelola Program Kerja
+          </h3>
+          <button
+            onclick="closeProkerCrudModal()"
+            class="text-white text-2xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+        <form
+          id="prokerCrudForm"
+          onsubmit="saveProker(event)"
+          class="p-6 space-y-4"
+        >
+          <input type="hidden" id="crudProkerIdx" />
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Judul Program Kerja</label
+            >
+            <input
+              type="text"
+              id="prokerTitle"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Deskripsi</label
+            >
+            <textarea
+              id="prokerDesc"
+              rows="3"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none resize-none"
+              required
+            ></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Penanggung Jawab (PIC)</label
+            >
+            <input
+              type="text"
+              id="prokerPic"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-teal-900 hover:bg-teal-800 text-white font-bold py-2.5 rounded-xl transition-all shadow-md"
+          >
+            Simpan Program Kerja
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- GALERI CRUD MODAL (ADD ONLY) -->
+    <div
+      id="galeriCrudModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-stone-100 fade-in"
+      >
+        <div
+          class="bg-teal-900 text-white p-5 flex justify-between items-center"
+        >
+          <h3 class="text-lg font-bold font-serif">Tambah Foto Dokumentasi</h3>
+          <button
+            onclick="closeGaleriCrudModal()"
+            class="text-white text-2xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+        <form
+          id="galeriCrudForm"
+          onsubmit="saveGaleri(event)"
+          class="p-6 space-y-4"
+        >
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Judul Kegiatan</label
+            >
+            <input
+              type="text"
+              id="galeriTitle"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Keterangan / Deskripsi Foto</label
+            >
+            <input
+              type="text"
+              id="galeriDesc"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >URL Gambar</label
+            >
+            <input
+              type="url"
+              id="galeriUrl"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none"
+              placeholder="https://images.unsplash.com/..."
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-teal-900 hover:bg-teal-800 text-white font-bold py-2.5 rounded-xl transition-all shadow-md"
+          >
+            Simpan Dokumentasi
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- BERITA CRUD MODAL (ADD) (NEW) -->
+    <div
+      id="beritaCrudModal"
+      class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl border border-stone-100 fade-in"
+      >
+        <div
+          class="bg-teal-900 text-white p-5 flex justify-between items-center"
+        >
+          <h3 class="text-lg font-bold font-serif">
+            Kelola Berita / Pengumuman Desa
+          </h3>
+          <button
+            onclick="closeAddBeritaModal()"
+            class="text-white text-2xl font-bold"
+          >
+            &times;
+          </button>
+        </div>
+        <form
+          id="beritaCrudForm"
+          onsubmit="saveBerita(event)"
+          class="p-6 space-y-4"
+        >
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Tipe Konten</label
+            >
+            <select
+              id="beritaKategori"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+            >
+              <option value="Berita">Berita & Kabar Desa</option>
+              <option value="Pengumuman">Pengumuman Penting</option>
+              <option value="Agenda">Agenda & Rapat Desa</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Judul Informasi</label
+            >
+            <input
+              type="text"
+              id="beritaTitle"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+              required
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Isi Berita / Detail Pengumuman</label
+            >
+            <textarea
+              id="beritaIsi"
+              rows="4"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none resize-none animate-none"
+              required
+              placeholder="Tulis rincian info..."
+            ></textarea>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500"
+              >Tanggal / Jadwal Acara</label
+            >
+            <input
+              type="date"
+              id="beritaTanggal"
+              class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:outline-none"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-teal-900 hover:bg-teal-800 text-white font-bold py-2.5 rounded-xl transition-all shadow-md"
+          >
+            Terbitkan Pengumuman
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- CORE JAVASCRIPT LOGIC -->
+    <script>
+      // ================= DATABASE ACCOUNTS (LOCAL STORAGE) =================
+      const defaultAccounts = [
+        { user: "user", pass: "user123", role: "user" },
+        { user: "admin", pass: "admin123", role: "admin" },
+      ];
+
+      let accounts = JSON.parse(localStorage.getItem("KKN_ACCOUNTS"));
+      if (!accounts) {
+        accounts = defaultAccounts;
+        localStorage.setItem("KKN_ACCOUNTS", JSON.stringify(accounts));
+      }
+
+      // ================= DATABASE MEMBERS, WORK PROGRAMS & VILLAGE STATS =================
+      const defaultMembers = [
+        {
+          nama: "JESIKA DANGI LONJA",
+          nim: "1123078",
+          prodi: "Manajemen",
+          grup: "Manajemen",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Membaca & Membuat Kue",
+          telp: "6282339841234",
+          ig: "jesika_dl",
+          fb: "Jesika Dangi Lonja",
+          lahir: "2004-03-15",
+          peran: "Div. Keuangan UMKM",
+          img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "NONA TRI TAMU INA",
+          nim: "1123139",
+          prodi: "Manajemen",
+          grup: "Manajemen",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Menari Tradisional & Traveling",
+          telp: "6282339841235",
+          ig: "nona_tritama",
+          fb: "Nona Tri Tamu",
+          peran: "Div. Pendampingan UMKM",
+          lahir: "2004-07-22",
+          img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "KRISTINA BILI",
+          nim: "1123176",
+          prodi: "Manajemen",
+          grup: "Manajemen",
+          jk: "P",
+          asal: "Sumba Barat, NTT",
+          hobi: "Menyanyi & Memasak",
+          telp: "6282339841236",
+          ig: "kristina_bili",
+          fb: "Kristina Bili",
+          peran: "Bendahara Kelompok",
+          lahir: "2003-11-09",
+          img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "SANIA RAMBU HANA",
+          nim: "1123107",
+          prodi: "Manajemen",
+          grup: "Manajemen",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Menulis Jurnal & Fotografi",
+          telp: "6282339841237",
+          ig: "sania_rambu",
+          fb: "Sania Rambu Hana",
+          peran: "Sekretaris II",
+          lahir: "2004-05-18",
+          img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "ETI MURA NGGUNA",
+          nim: "3123006",
+          prodi: "Pendidikan Biologi",
+          grup: "Pendidikan",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Berkebun & Koleksi Tanaman",
+          telp: "6282339841238",
+          ig: "eti_mura",
+          fb: "Eti Mura Ngguna",
+          peran: "Div. Edukasi Ekologi",
+          lahir: "2003-09-04",
+          img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "YEYEN KOKU YOWA",
+          nim: "3123091",
+          prodi: "Pendidikan Biologi",
+          grup: "Pendidikan",
+          jk: "P",
+          asal: "Sumba Barat Daya, NTT",
+          hobi: "Bulu Tangkis & Membaca",
+          telp: "6282339841239",
+          ig: "yeyen_koku",
+          fb: "Yeyen Koku",
+          peran: "Div. Program Mengajar",
+          lahir: "2004-01-30",
+          img: "https://images.unsplash.com/photo-1554151228-14d9def656e4?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "ASRIRIN NGGABA",
+          nim: "3123072",
+          prodi: "Pendidikan Biologi",
+          grup: "Pendidikan",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Kuliner & Menggambar",
+          telp: "6282339841240",
+          ig: "asririn_nggaba",
+          fb: "Asririn Nggaba",
+          peran: "Div. Penyuluhan Kesehatan",
+          lahir: "2003-12-12",
+          img: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "DESTA RASTRA PUTRA ANGGARAKSA",
+          nim: "2123069",
+          prodi: "Teknik Informatika",
+          grup: "Informatika",
+          jk: "L",
+          asal: "Sumba Timur, NTT",
+          hobi: "Coding, Gaming & Basket",
+          telp: "6282339841241",
+          ig: "destarastra_",
+          fb: "Desta Rastra",
+          peran: "Div. Digitalisasi Desa",
+          lahir: "2004-08-25",
+          img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "JAMES LAMIK MANGGIA",
+          nim: "2123061",
+          prodi: "Teknik Informatika",
+          grup: "Informatika",
+          jk: "L",
+          asal: "Sumba Timur, NTT",
+          hobi: "Coding, Main Gitar & Ngopi",
+          telp: "6282339841242",
+          ig: "james_manggia",
+          fb: "James Lamik",
+          peran: "Div. Anggota",
+          lahir: "2003-06-14",
+          img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "FRICHELYA MAHARANI TAMU INA",
+          nim: "1323089",
+          prodi: "Hukum",
+          grup: "Hukum",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Public Speaking & Menulis",
+          telp: "6282339841243",
+          ig: "frichelya_mti",
+          fb: "Frichelya Maharani",
+          peran: "Div. Sosialisasi Hukum",
+          lahir: "2004-10-05",
+          img: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "APRILIAN DAY MBATI",
+          nim: "1323020",
+          prodi: "Hukum",
+          grup: "Hukum",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Debat & Mendengarkan Musik",
+          telp: "6282339841244",
+          ig: "aprilian_day",
+          fb: "Aprilian Day",
+          peran: "Div. Advokasi & Tata Tertib",
+          lahir: "2004-04-12",
+          img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "RISTO PINDU JAWA",
+          nim: "1223021",
+          prodi: "Ekonomi Pembangunan",
+          grup: "Manajemen",
+          jk: "L",
+          asal: "Sumba Timur, NTT",
+          hobi: "Analisis Data & Futsal",
+          telp: "6282339841245",
+          ig: "risto_pj",
+          fb: "Risto Pindu Jawa",
+          peran: "Div. Analisis Ekonomi",
+          lahir: "2003-05-24",
+          img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "YUNIAR FERONIKA FERDINAN",
+          nim: "2323022",
+          prodi: "Agroteknologi",
+          grup: "Sains",
+          jk: "P",
+          asal: "Alor, NTT",
+          hobi: "Identifikasi Serangga & Bersepeda",
+          telp: "6282339841246",
+          ig: "yuniar_feronika",
+          fb: "Yuniar Feronika",
+          peran: "Div. Ketahanan Pangan",
+          lahir: "2004-06-08",
+          img: "https://images.unsplash.com/photo-1561406636-b8029a7a81cf?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "DAVID META KAMALA",
+          nim: "3221031",
+          prodi: "Pendidikan Matematika",
+          grup: "Pendidikan",
+          jk: "L",
+          asal: "Sumba Barat Daya, NTT",
+          hobi: "Catur & Puzzle Logika",
+          telp: "6282339841247",
+          ig: "david_kamala",
+          fb: "David Meta Kamala",
+          peran: "Div. Media Edukasi",
+          lahir: "2002-12-15",
+          img: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "UMBU TAMU KILINGGORU",
+          nim: "2423008",
+          prodi: "Peternakan",
+          grup: "Sains",
+          jk: "L",
+          asal: "Sumba Timur, NTT",
+          hobi: "Pacuan Kuda & Berenang",
+          telp: "6282339841248",
+          ig: "umbu_tamu",
+          fb: "Umbu Tamu",
+          peran: "Div. Ketua",
+          lahir: "2003-07-07",
+          img: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&q=80&w=400",
+        },
+        {
+          nama: "ANGGRENI WULANDARI HUKAPATI",
+          nim: "2523013",
+          prodi: "Teknologi Hasil Perikanan",
+          grup: "Sains",
+          jk: "P",
+          asal: "Sumba Timur, NTT",
+          hobi: "Memasak & Menari",
+          telp: "6282339841249",
+          ig: "anggreni_wulan",
+          fb: "Anggreni Wulandari",
+          peran: "Div. Pengolahan Pertanian",
+          lahir: "2004-12-19",
+          img: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&q=80&w=400",
+        },
+      ];
+
+      const defaultProkers = [
+        {
+          title: "Tamburi Digital Hub",
+          desc: "Pengembangan situs profil digital desa dan pelatihan komputer administrasi guna memodernisasi tata kelola kependudukan setempat.",
+          pic: "Teknik Informatika",
+        },
+        {
+          title: "Optimalisasi Tani & Ternak",
+          desc: "Penyuluhan pembuatan formula pakan sapi/kuda berkualitas serta demonstrasi pembuatan pupuk organik ramah lingkungan.",
+          pic: "Agroteknologi & Peternakan",
+        },
+        {
+          title: "Griya Belajar Rindi",
+          desc: "Peningkatan literasi dasar kependidikan dan bimbingan sains serta matematika dasar interaktif untuk anak usia sekolah.",
+          pic: "Kependidikan",
+        },
+        {
+          title: "Penyuluhan Hukum & Administrasi",
+          desc: "Sosialisasi pentingnya pembuatan Akta Kelahiran/KTP, tertib administrasi sipil, serta edukasi hak-hak kepemilikan tanah.",
+          pic: "Ilmu Hukum",
+        },
+        {
+          title: "Pemberdayaan UMKM Tenun",
+          desc: "Pelatihan pencatatan keuangan pembukuan bisnis, teknik strategi pemasaran digital, serta branding produk tenun lokal Sumba.",
+          pic: "Manajemen & Ekonomi",
+        },
+        {
+          title: "Eco-Tourism & Kebersihan",
+          desc: "Pengadaan infrastruktur wadah pilah sampah kering/basah serta penataan papan petunjuk arah edukatif kawasan wisata sabana.",
+          pic: "Kolaborasi Seluruh Tim",
+        },
+      ];
+
+      const defaultGaleri = [
+        {
+          title: "Pertemuan Hangat Balai Desa",
+          desc: "Sinergitas perencanaan program KKN Kelompok 10 bersama perangkat Desa Tamburi.",
+          url: "IMG-20260515-WA0265.jpg",
+        },
+        {
+          title: "Ceria Griya Belajar",
+          desc: "Antusiasme belajar adik-adik sekolah dasar pada bimbingan akademis di sore hari.",
+          url: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=800",
+        },
+        {
+          title: "Pesona Sabana Rindi",
+          desc: "Lanskap sabana elok yang menakjubkan di sekitar kawasan pemukiman Desa Tamburi.",
+          url: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&q=80&w=800",
+        },
+      ];
+
+      // Default Demography Stats (Editable by Admin)
+      const defaultPendudukStats = {
+        totalKK: 342,
+        totalJiwa: 1482,
+        lakiLaki: 730,
+        perempuan: 752,
+        petani: 45,
+        peternak: 30,
+        penenun: 15,
+        pns: 5,
+        lainnya: 5,
+      };
+
+      // Default Berita, Pengumuman & Agenda Desa (Editable by Admin)
+      const defaultBeritaData = [
+        {
+          id: 1,
+          kategori: "Berita",
+          title: "Gotong Royong Perbaikan Saluran Air",
+          isi: "Warga Desa Tamburi bersama mahasiswa KKN Kelompok 10 kompak mengadakan kerja bakti membersihkan irigasi sawah tersier.",
+          tanggal: "2026-05-14",
+        },
+        {
+          id: 2,
+          kategori: "Pengumuman",
+          title: "Jadwal Pembagian BLT Tahap II",
+          isi: "Pembagian Bantuan Langsung Tunai (BLT) Dana Desa akan disalurkan di Balai Desa mulai pukul 09.00 WITA. Harap membawa KK asli.",
+          tanggal: "2026-05-19",
+        },
+        {
+          id: 3,
+          kategori: "Agenda",
+          title: "Musyawarah Perencanaan Desa (Musrenbang)",
+          isi: "Rapat koordinasi penting membahas prioritas pembangunan infrastruktur tahun anggaran berikutnya bersama seluruh jajaran adat.",
+          tanggal: "2026-05-22",
+        },
+      ];
+
+      let membersData =
+        JSON.parse(localStorage.getItem("KKN_MEMBERS")) || defaultMembers;
+      let prokersData =
+        JSON.parse(localStorage.getItem("KKN_PROKERS")) || defaultProkers;
+      let galeriData =
+        JSON.parse(localStorage.getItem("KKN_GALERI")) || defaultGaleri;
+      let pendudukStats =
+        JSON.parse(localStorage.getItem("KKN_PENDUDUK_STATS")) ||
+        defaultPendudukStats;
+      let beritaData =
+        JSON.parse(localStorage.getItem("KKN_BERITA")) || defaultBeritaData;
+
+      // ================= SISTEM DESA DATA (LOCAL STORAGE) =================
+      const defaultSuratRequests = [
+        {
+          id: 1,
+          nama: "Lazarus Tamu",
+          nik: "5302192138290002",
+          jenis: "Surat Keterangan Domisili",
+          status: "Disetujui",
+        },
+        {
+          id: 2,
+          nama: "Mariana Hana",
+          nik: "5302198471280001",
+          jenis: "Surat Keterangan Usaha (SKU)",
+          status: "Pending",
+        },
+      ];
+
+      const defaultAspirasi = [
+        {
+          id: 1,
+          nama: "Rambu Kalara",
+          isi: "Mohon bak sampah di area sabana ditambah agar wisatawan tidak membuang sampah sembarangan.",
+          tanggapan: "",
+        },
+        {
+          id: 2,
+          nama: "Umbu Ndahawali",
+          isi: "Pelatihan komputer untuk anak muda sangat bermanfaat, kalau bisa dilanjutkan setelah KKN selesai.",
+          tanggapan:
+            "Terima kasih sarannya, modul pelatihan digital kami berikan kepada pemuda karang taruna.",
+        },
+      ];
+
+      let suratRequests =
+        JSON.parse(localStorage.getItem("KKN_SURAT_REQUESTS")) ||
+        defaultSuratRequests;
+      let aspirasiList =
+        JSON.parse(localStorage.getItem("KKN_ASPIRASI")) || defaultAspirasi;
+
+      // ================= GLOBAL STATE VARIABLES =================
+      let activeFilter = "all";
+      let chartsInitialized = false;
+      let loggedInUser =
+        JSON.parse(localStorage.getItem("KKN_LOGGED_USER")) || null;
+      let isAdmin = JSON.parse(localStorage.getItem("KKN_IS_ADMIN")) || false;
+
+      // ================= NOTIFICATION CONTROL =================
+      function triggerAlert(message, isSuccess = true) {
+        const banner = document.getElementById("alertBanner");
+        const msgEl = document.getElementById("alertMessage");
+        const iconEl = document.getElementById("alertIcon");
+
+        iconEl.innerText = isSuccess ? "✅" : "❌";
+        msgEl.innerText = message;
+
+        banner.classList.remove("hidden");
+        setTimeout(() => {
+          banner.classList.add("hidden");
+        }, 4000);
+      }
+
+      function closeAlert() {
+        document.getElementById("alertBanner").classList.add("hidden");
+      }
+
+      // ================= AUTHENTICATION LOGIC =================
+      function checkAuthState() {
+        if (loggedInUser) {
+          document.getElementById("authScreen").classList.add("hidden");
+          document.getElementById("mainApp").classList.remove("hidden");
+          updateAdminUIVisibility();
+          initAppElements();
+        } else {
+          document.getElementById("authScreen").classList.remove("hidden");
+          document.getElementById("mainApp").classList.add("hidden");
+        }
+      }
+
+      function toggleAuthPanel(panel) {
+        if (panel === "register") {
+          document.getElementById("loginPanel").classList.add("hidden");
+          document.getElementById("registerPanel").classList.remove("hidden");
+        } else {
+          document.getElementById("loginPanel").classList.remove("hidden");
+          document.getElementById("registerPanel").classList.add("hidden");
+        }
+      }
+
+      function handleLogin() {
+        const userIn = document.getElementById("loginUser").value.trim();
+        const passIn = document.getElementById("loginPass").value.trim();
+
+        if (!userIn || !passIn) {
+          triggerAlert("Username dan Password tidak boleh kosong!", false);
+          return;
+        }
+
+        const found = accounts.find(
+          (acc) =>
+            acc.user.toLowerCase() === userIn.toLowerCase() &&
+            acc.pass === passIn
+        );
+        if (found) {
+          loggedInUser = found;
+          localStorage.setItem("KKN_LOGGED_USER", JSON.stringify(found));
+
+          if (found.role === "admin") {
+            isAdmin = true;
+            localStorage.setItem("KKN_IS_ADMIN", JSON.stringify(true));
+          } else {
+            isAdmin = false;
+            localStorage.setItem("KKN_IS_ADMIN", JSON.stringify(false));
+          }
+
+          triggerAlert(`Selamat datang kembali, ${found.user}!`);
+          checkAuthState();
+        } else {
+          triggerAlert("Username atau Password salah!", false);
+        }
+      }
+
+      function handleRegister() {
+        const userIn = document.getElementById("regUser").value.trim();
+        const passIn = document.getElementById("regPass").value.trim();
+
+        if (!userIn || !passIn) {
+          triggerAlert("Username dan Password baru tidak boleh kosong!", false);
+          return;
+        }
+
+        const exist = accounts.find(
+          (acc) => acc.user.toLowerCase() === userIn.toLowerCase()
+        );
+        if (exist) {
+          triggerAlert("Username sudah terdaftar!", false);
+          return;
+        }
+
+        const newAcc = { user: userIn, pass: passIn, role: "user" };
+        accounts.push(newAcc);
+        localStorage.setItem("KKN_ACCOUNTS", JSON.stringify(accounts));
+        triggerAlert("Pendaftaran berhasil! Silakan masuk.");
+        toggleAuthPanel("login");
+      }
+
+      function handleLogout() {
+        loggedInUser = null;
+        isAdmin = false;
+        localStorage.removeItem("KKN_LOGGED_USER");
+        localStorage.removeItem("KKN_IS_ADMIN");
+        triggerAlert("Anda berhasil keluar.");
+        checkAuthState();
+      }
+
+      // ================= ADMIN PRIVILEGES CONTROL =================
+      function openAdminAuth() {
+        if (isAdmin) {
+          isAdmin = false;
+          localStorage.setItem("KKN_IS_ADMIN", JSON.stringify(false));
+          triggerAlert("Mode admin dinonaktifkan.");
+          updateAdminUIVisibility();
+          return;
+        }
+        document.getElementById("adminAuthModal").classList.remove("hidden");
+      }
+
+      function closeAdminAuth() {
+        document.getElementById("adminAuthModal").classList.add("hidden");
+      }
+
+      function handleAdminLogin() {
+        const user = document.getElementById("adminUser").value.trim();
+        const pass = document.getElementById("adminPass").value.trim();
+
+        const foundAdmin = accounts.find(
+          (acc) =>
+            acc.user.toLowerCase() === user.toLowerCase() &&
+            acc.pass === pass &&
+            acc.role === "admin"
+        );
+        if (foundAdmin) {
+          isAdmin = true;
+          localStorage.setItem("KKN_IS_ADMIN", JSON.stringify(true));
+          triggerAlert("Mode Admin diaktifkan! Anda memiliki kontrol penuh.");
+          closeAdminAuth();
+          updateAdminUIVisibility();
+          initAppElements();
+        } else {
+          triggerAlert("Akses ditolak! Kredensial admin salah.", false);
+        }
+      }
+
+      function updateAdminUIVisibility() {
+        const adminButtons = [
+          "adminAddMemberBtn",
+          "adminAddProkerBtn",
+          "adminAddGaleriBtn",
+          "adminEditPendudukBtn",
+          "adminAddBeritaBtn",
+          "badgeAdmin",
+        ];
+
+        adminButtons.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) {
+            if (isAdmin) {
+              el.classList.remove("hidden");
+            } else {
+              el.classList.add("hidden");
+            }
+          }
+        });
+
+        const btn = document.getElementById("btnAdminLogin");
+        if (btn) {
+          btn.innerText = isAdmin ? "Keluar Admin" : "Login Admin";
+          if (isAdmin) {
+            btn.classList.add("bg-red-600", "text-white");
+            btn.classList.remove("bg-amber-500", "text-teal-950");
+          } else {
+            btn.classList.remove("bg-red-600", "text-white");
+            btn.classList.add("bg-amber-500", "text-teal-950");
+          }
+        }
+
+        renderMembers();
+        renderProkers();
+        renderGaleri();
+        renderSuratRequests();
+        renderAspirasi();
+        renderBerita();
+      }
+
+      // ================= GENERAL CALCULATOR & UTILITIES =================
+      function calculateAge(dobString) {
+        const birthDate = new Date(dobString);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (
+          monthDiff < 0 ||
+          (monthDiff === 0 && today.getDate() < birthDate.getDate())
+        ) {
+          age--;
+        }
+        return age;
+      }
+
+      function formatDateIndo(dateString) {
+        const options = { year: "numeric", month: "long", day: "numeric" };
+        return new Date(dateString).toLocaleDateString("id-ID", options);
+      }
+
+      // ================= APP INITIALIZATION =================
+      function initAppElements() {
+        document.getElementById("statMembersCount").innerText =
+          membersData.length;
+        document.getElementById("statProkerCount").innerText =
+          prokersData.length;
+        renderMembers();
+        renderProkers();
+        renderGaleri();
+        renderSuratRequests();
+        renderAspirasi();
+        renderBerita();
+        updatePendudukUI();
+        initStatisticalCharts();
+      }
+
+      // ================= TAB NAVIGATION =================
+      function switchTab(tabId) {
+        document.querySelectorAll(".tab-content").forEach((el) => {
+          el.classList.add("hidden");
+          el.classList.remove("block");
+        });
+        document.querySelectorAll(".nav-btn").forEach((el) => {
+          el.classList.remove("nav-active");
+          if (el.id !== `nav-${tabId}`) el.classList.add("text-teal-100");
+        });
+
+        const targetPage = document.getElementById(tabId);
+        targetPage.classList.remove("hidden");
+        targetPage.classList.add("block");
+
+        const currentNav = document.getElementById(`nav-${tabId}`);
+        currentNav.classList.add("nav-active");
+        currentNav.classList.remove("text-teal-100");
+
+        if (tabId === "sahabat" && !chartsInitialized) {
+          initVisualizations();
+          chartsInitialized = true;
+        }
+
+        if (tabId === "sahabat") {
+          renderMembers();
+        }
+
+        // Reset sub-pages in "Sistem Desa" tab when leaving the tab
+        if (tabId !== "sistem-desa") {
+          goBackToSistemDesaMenu();
+        }
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // ================= INTERACTIVE SUB PAGES IN "SISTEM DESA" =================
+      function showSistemDesaSubPage(subPageId) {
+        document.getElementById("sistemDesaMenu").classList.add("hidden");
+
+        // Hide all sub-pages
+        const subPages = [
+          "subPageSurat",
+          "subPageKeuangan",
+          "subPageKependudukan",
+          "subPageAspirasi",
+          "subPageBerita",
+        ];
+        subPages.forEach((id) => {
+          document.getElementById(id).classList.add("hidden");
+        });
+
+        // Show active sub-page
+        const activeSubPage = document.getElementById(subPageId);
+        activeSubPage.classList.remove("hidden");
+
+        // Force rendering/updating charts associated with sub-pages when they open
+        setTimeout(() => {
+          initStatisticalCharts();
+        }, 50);
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function goBackToSistemDesaMenu() {
+        const menu = document.getElementById("sistemDesaMenu");
+        if (menu) {
+          menu.classList.remove("hidden");
+        }
+
+        const subPages = [
+          "subPageSurat",
+          "subPageKeuangan",
+          "subPageKependudukan",
+          "subPageAspirasi",
+          "subPageBerita",
+        ];
+        subPages.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add("hidden");
+        });
+      }
+
+      // ================= DATA VISUALIZATION (CHART.JS) =================
+      let prodiChart, genderChart, pekerjaanChart, apbdesChart;
+
+      function initVisualizations() {
+        const counts = {};
+        membersData.forEach((m) => {
+          counts[m.grup] = (counts[m.grup] || 0) + 1;
+        });
+
+        const prodiCtx = document.getElementById("prodiChart").getContext("2d");
+        if (prodiChart) prodiChart.destroy();
+        prodiChart = new Chart(prodiCtx, {
+          type: "bar",
+          data: {
+            labels: Object.keys(counts),
+            datasets: [
+              {
+                label: "Mahasiswa",
+                data: Object.values(counts),
+                backgroundColor: "#0f766e",
+                borderRadius: 6,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: { beginAtZero: true, ticks: { stepSize: 1 } },
+              x: { grid: { display: false } },
+            },
+          },
+        });
+
+        let pCount = membersData.filter((m) => m.jk === "P").length;
+        let lCount = membersData.filter((m) => m.jk === "L").length;
+
+        const genderCtx = document
+          .getElementById("genderChart")
+          .getContext("2d");
+        if (genderChart) genderChart.destroy();
+        genderChart = new Chart(genderCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["Perempuan", "Laki-laki"],
+            datasets: [
+              {
+                data: [pCount, lCount],
+                backgroundColor: ["#d97706", "#0f766e"],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "70%",
+            plugins: { legend: { position: "bottom" } },
+          },
+        });
+      }
+
+      // ================= KEPENDUDUKAN STATS & APBDES (VILLAGE SYSTEM) =================
+      function updatePendudukUI() {
+        document.getElementById(
+          "displayKK"
+        ).innerText = `${pendudukStats.totalKK} KK`;
+        document.getElementById(
+          "displayJiwa"
+        ).innerText = `${pendudukStats.totalJiwa} Jiwa`;
+        document.getElementById(
+          "displayLaki"
+        ).innerText = `${pendudukStats.lakiLaki} Jiwa`;
+        document.getElementById(
+          "displayPerempuan"
+        ).innerText = `${pendudukStats.perempuan} Jiwa`;
+      }
+
+      function initStatisticalCharts() {
+        // Sektor Pekerjaan
+        const pekCtx = document
+          .getElementById("pekerjaanChart")
+          .getContext("2d");
+        if (pekerjaanChart) pekerjaanChart.destroy();
+        pekerjaanChart = new Chart(pekCtx, {
+          type: "pie",
+          data: {
+            labels: [
+              "Petani",
+              "Peternak",
+              "Penenun",
+              "PNS/Perangkat",
+              "Lainnya",
+            ],
+            datasets: [
+              {
+                data: [
+                  pendudukStats.petani,
+                  pendudukStats.peternak,
+                  pendudukStats.penenun,
+                  pendudukStats.pns,
+                  pendudukStats.lainnya,
+                ],
+                backgroundColor: [
+                  "#0f766e",
+                  "#d97706",
+                  "#06b6d4",
+                  "#475569",
+                  "#cbd5e1",
+                ],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "right",
+                labels: { boxWidth: 12, font: { size: 10 } },
+              },
+            },
+          },
+        });
+
+        // Sektor APBDes Transparansi Belanja Desa
+        const apbCtx = document.getElementById("apbdesChart").getContext("2d");
+        if (apbdesChart) apbdesChart.destroy();
+        apbdesChart = new Chart(apbCtx, {
+          type: "doughnut",
+          data: {
+            labels: [
+              "Pembangunan Desa",
+              "Pembinaan Masyarakat",
+              "Penyelenggaraan Pemerintahan",
+              "Pemberdayaan Warga",
+              "Darurat/Bencana",
+            ],
+            datasets: [
+              {
+                data: [45, 20, 18, 12, 5],
+                backgroundColor: [
+                  "#0f766e",
+                  "#d97706",
+                  "#06b6d4",
+                  "#4f46e5",
+                  "#ef4444",
+                ],
+                borderWidth: 0,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "right",
+                labels: { boxWidth: 12, font: { size: 11 } },
+              },
+            },
+          },
+        });
+      }
+
+      function openEditPendudukModal() {
+        document.getElementById("editTotalKK").value = pendudukStats.totalKK;
+        document.getElementById("editTotalJiwa").value =
+          pendudukStats.totalJiwa;
+        document.getElementById("editLakiLaki").value = pendudukStats.lakiLaki;
+        document.getElementById("editPerempuan").value =
+          pendudukStats.perempuan;
+
+        document.getElementById("editPctPetani").value = pendudukStats.petani;
+        document.getElementById("editPctPeternak").value =
+          pendudukStats.peternak;
+        document.getElementById("editPctPenenun").value = pendudukStats.penenun;
+        document.getElementById("editPctPNS").value = pendudukStats.pns;
+        document.getElementById("editPctLainnya").value = pendudukStats.lainnya;
+
+        document.getElementById("pendudukEditModal").classList.remove("hidden");
+      }
+
+      function closeEditPendudukModal() {
+        document.getElementById("pendudukEditModal").classList.add("hidden");
+      }
+
+      function savePendudukStats(e) {
+        e.preventDefault();
+        const p1 = parseInt(document.getElementById("editPctPetani").value);
+        const p2 = parseInt(document.getElementById("editPctPeternak").value);
+        const p3 = parseInt(document.getElementById("editPctPenenun").value);
+        const p4 = parseInt(document.getElementById("editPctPNS").value);
+        const p5 = parseInt(document.getElementById("editPctLainnya").value);
+
+        if (p1 + p2 + p3 + p4 + p5 !== 100) {
+          triggerAlert(
+            "Total persentase pekerjaan harus berjumlah 100%!",
+            false
+          );
+          return;
+        }
+
+        pendudukStats = {
+          totalKK: parseInt(document.getElementById("editTotalKK").value),
+          totalJiwa: parseInt(document.getElementById("editTotalJiwa").value),
+          lakiLaki: parseInt(document.getElementById("editLakiLaki").value),
+          perempuan: parseInt(document.getElementById("editPerempuan").value),
+          petani: p1,
+          peternak: p2,
+          penenun: p3,
+          pns: p4,
+          lainnya: p5,
+        };
+
+        localStorage.setItem(
+          "KKN_PENDUDUK_STATS",
+          JSON.stringify(pendudukStats)
+        );
+        triggerAlert("Statistik kependudukan desa berhasil di-update!");
+        closeEditPendudukModal();
+        updatePendudukUI();
+        initStatisticalCharts();
+      }
+
+      // ================= RENDERING 16 SAHABAT & CRUD =================
+      function renderMembers() {
+        const grid = document.getElementById("membersGrid");
+        grid.innerHTML = "";
+
+        const searchVal = document
+          .getElementById("memberSearch")
+          .value.toLowerCase();
+
+        membersData.forEach((m, idx) => {
+          const isMatchFilter =
+            activeFilter === "all" || m.grup === activeFilter;
+          const isMatchSearch =
+            m.nama.toLowerCase().includes(searchVal) ||
+            m.prodi.toLowerCase().includes(searchVal);
+
+          if (isMatchFilter && isMatchSearch) {
+            const icon = m.jk === "L" ? "👨‍🎓" : "👩‍🎓";
+
+            const adminControls = isAdmin
+              ? `
+                        <div class="flex gap-2 mt-3">
+                            <button onclick="openEditMemberModal(${idx})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] py-1.5 rounded-lg transition-all">Edit</button>
+                            <button onclick="handleDeleteMember(${idx})" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] py-1.5 rounded-lg transition-all">Hapus</button>
+                        </div>
+                    `
+              : "";
+
+            const card = `
+                        <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 hover:border-teal-700 hover:shadow-md transition-all flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-amber-500 shadow bg-slate-100">
+                                        <img src="${
+                                          m.img
+                                        }" alt="Avatar" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/eaeaea/777777?text=${
+              m.nama.split(" ")[0]
+            }'">
+                                    </div>
+                                    <div class="truncate">
+                                        <h3 class="font-bold text-teal-950 truncate text-sm uppercase">${
+                                          m.nama
+                                        }</h3>
+                                        <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider">${
+                                          m.prodi
+                                        }</p>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">NIM: ${
+                                  m.nim
+                                }</p>
+                                <div class="bg-slate-50 border border-slate-100 p-2.5 rounded-xl text-xs text-slate-600 mt-3 font-medium truncate" title="${
+                                  m.peran
+                                }">
+                                    Peran: ${m.peran}
+                                </div>
+                            </div>
+                            <div>
+                                <button onclick="openModal(${idx})" class="mt-4 bg-teal-950 hover:bg-teal-900 text-white font-bold text-xs py-2 rounded-xl transition-all w-full">Detail Lengkap</button>
+                                ${adminControls}
+                            </div>
+                        </div>
+                    `;
+            grid.innerHTML += card;
+          }
+        });
+
+        if (grid.innerHTML === "") {
+          grid.innerHTML = `<p class="col-span-full text-center text-slate-500 py-12">Tidak ada data ditemukan untuk kriteria pencarian ini.</p>`;
+        }
+      }
+
+      function setFilter(category, btn) {
+        activeFilter = category;
+        document.querySelectorAll(".filter-btn").forEach((el) => {
+          el.classList.remove("bg-teal-900", "text-white");
+          el.classList.add("bg-slate-100", "text-slate-700");
+        });
+        btn.classList.remove("bg-slate-100", "text-slate-700");
+        btn.classList.add("bg-teal-900", "text-white");
+        renderMembers();
+      }
+
+      // ================= DETAIL MODAL POPULATOR =================
+      function openModal(index) {
+        const m = membersData[index];
+        document.getElementById("modalName").innerText = m.nama;
+        document.getElementById("modalProdi").innerText = m.prodi;
+        document.getElementById("modalNim").innerText = m.nim;
+        document.getElementById("modalAsal").innerText = m.asal;
+        document.getElementById("modalLahir").innerText = formatDateIndo(
+          m.lahir
+        );
+        document.getElementById("modalUmur").innerText = `${calculateAge(
+          m.lahir
+        )} Tahun`;
+        document.getElementById("modalHobi").innerText = m.hobi;
+
+        const modalImg = document.getElementById("modalMemberImg");
+        modalImg.src = m.img;
+        modalImg.onerror = function () {
+          this.src = `https://placehold.co/100x100/eaeaea/777777?text=${
+            m.nama.split(" ")[0]
+          }`;
+        };
+
+        document.getElementById("modalWa").href = `https://wa.me/${
+          m.telp
+        }?text=Halo%20${encodeURIComponent(m.nama)}!`;
+        document.getElementById("modalWaVal").innerText = `+${m.telp}`;
+        document.getElementById(
+          "modalIg"
+        ).href = `https://instagram.com/${m.ig}`;
+        document.getElementById("modalIgVal").innerText = `@${m.ig}`;
+        document.getElementById(
+          "modalFb"
+        ).href = `https://facebook.com/search/top/?q=${encodeURIComponent(
+          m.fb
+        )}`;
+        document.getElementById("modalFbVal").innerText = m.fb;
+
+        document.getElementById("profileModal").classList.remove("hidden");
+      }
+
+      function closeModal() {
+        document.getElementById("profileModal").classList.add("hidden");
+      }
+
+      // ================= MEMBER CRUD LOGIC (ADMIN) =================
+      function openAddMemberModal() {
+        document.getElementById("memberCrudTitle").innerText =
+          "Tambah Sahabat KKN Baru";
+        document.getElementById("crudMemberIdx").value = "";
+        document.getElementById("memberCrudForm").reset();
+        document.getElementById("memberCrudModal").classList.remove("hidden");
+      }
+
+      function openEditMemberModal(idx) {
+        const m = membersData[idx];
+        document.getElementById("memberCrudTitle").innerText =
+          "Ubah Informasi Anggota";
+        document.getElementById("crudMemberIdx").value = idx;
+
+        document.getElementById("crudName").value = m.nama;
+        document.getElementById("crudNim").value = m.nim;
+        document.getElementById("crudProdi").value = m.prodi;
+        document.getElementById("crudGrup").value = m.grup;
+        document.getElementById("crudJk").value = m.jk;
+        document.getElementById("crudAsal").value = m.asal;
+        document.getElementById("crudLahir").value = m.lahir;
+        document.getElementById("crudHobi").value = m.hobi;
+        document.getElementById("crudTelp").value = m.telp;
+        document.getElementById("crudPeran").value = m.peran;
+        document.getElementById("crudIg").value = m.ig;
+        document.getElementById("crudFb").value = m.fb;
+        document.getElementById("crudImg").value = m.img || "";
+
+        document.getElementById("memberCrudModal").classList.remove("hidden");
+      }
+
+      function closeMemberCrudModal() {
+        document.getElementById("memberCrudModal").classList.add("hidden");
+      }
+
+      function saveMember(e) {
+        e.preventDefault();
+        const idx = document.getElementById("crudMemberIdx").value;
+
+        const customImg = document.getElementById("crudImg").value.trim();
+        const fallbackImg =
+          "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400";
+
+        const newMember = {
+          nama: document.getElementById("crudName").value.toUpperCase(),
+          nim: document.getElementById("crudNim").value,
+          prodi: document.getElementById("crudProdi").value,
+          grup: document.getElementById("crudGrup").value,
+          jk: document.getElementById("crudJk").value,
+          asal: document.getElementById("crudAsal").value,
+          lahir: document.getElementById("crudLahir").value,
+          hobi: document.getElementById("crudHobi").value,
+          telp: document.getElementById("crudTelp").value,
+          peran: document.getElementById("crudPeran").value,
+          ig: document.getElementById("crudIg").value,
+          fb: document.getElementById("crudFb").value,
+          img: customImg !== "" ? customImg : fallbackImg,
+        };
+
+        if (idx === "") {
+          membersData.push(newMember);
+          triggerAlert("Sahabat baru berhasil ditambahkan!");
+        } else {
+          membersData[idx] = newMember;
+          triggerAlert("Informasi sahabat berhasil diperbarui!");
+        }
+
+        localStorage.setItem("KKN_MEMBERS", JSON.stringify(membersData));
+        closeMemberCrudModal();
+        initAppElements();
+        if (chartsInitialized) initVisualizations();
+      }
+
+      function handleDeleteMember(idx) {
+        const confirmDelete = confirm(
+          `Apakah Anda yakin ingin menghapus ${membersData[idx].nama}?`
+        );
+        if (confirmDelete) {
+          membersData.splice(idx, 1);
+          localStorage.setItem("KKN_MEMBERS", JSON.stringify(membersData));
+          triggerAlert("Anggota berhasil dihapus.");
+          initAppElements();
+          if (chartsInitialized) initVisualizations();
+        }
+      }
+
+      // ================= PROGRAM KERJA RENDERING & CRUD =================
+      function renderProkers() {
+        const grid = document.getElementById("prokerGrid");
+        grid.innerHTML = "";
+
+        prokersData.forEach((p, idx) => {
+          const adminControls = isAdmin
+            ? `
+                    <div class="flex gap-2 mt-4 pt-3 border-t border-slate-100">
+                        <button onclick="openEditProkerModal(${idx})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-1.5 rounded-lg transition-all">Edit</button>
+                        <button onclick="handleDeleteProker(${idx})" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-1.5 rounded-lg transition-all">Hapus</button>
+                    </div>
+                `
+            : "";
+
+          const card = `
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 border-t-4 border-teal-800 flex flex-col justify-between hover:shadow-md transition-all">
+                        <div>
+                            <div class="text-3xl mb-3">🛠️</div>
+                            <h3 class="font-bold text-lg text-teal-950 font-serif mb-2">${p.title}</h3>
+                            <p class="text-sm text-slate-600 leading-relaxed mb-4">${p.desc}</p>
+                        </div>
+                        <div>
+                            <div class="text-xs bg-slate-100 text-teal-900 font-bold px-3 py-1.5 rounded inline-block">PIC: ${p.pic}</div>
+                            ${adminControls}
+                        </div>
+                    </div>
+                `;
+          grid.innerHTML += card;
+        });
+      }
+
+      function openAddProkerModal() {
+        document.getElementById("prokerCrudTitle").innerText =
+          "Tambah Program Kerja Baru";
+        document.getElementById("crudProkerIdx").value = "";
+        document.getElementById("prokerCrudForm").reset();
+        document.getElementById("prokerCrudModal").classList.remove("hidden");
+      }
+
+      function openEditProkerModal(idx) {
+        const p = prokersData[idx];
+        document.getElementById("prokerCrudTitle").innerText =
+          "Edit Program Kerja";
+        document.getElementById("crudProkerIdx").value = idx;
+        document.getElementById("prokerTitle").value = p.title;
+        document.getElementById("prokerDesc").value = p.desc;
+        document.getElementById("prokerPic").value = p.pic;
+        document.getElementById("prokerCrudModal").classList.remove("hidden");
+      }
+
+      function closeProkerCrudModal() {
+        document.getElementById("prokerCrudModal").classList.add("hidden");
+      }
+
+      function saveProker(e) {
+        e.preventDefault();
+        const idx = document.getElementById("crudProkerIdx").value;
+
+        const newProker = {
+          title: document.getElementById("prokerTitle").value,
+          desc: document.getElementById("prokerDesc").value,
+          pic: document.getElementById("prokerPic").value,
+        };
+
+        if (idx === "") {
+          prokersData.push(newProker);
+          triggerAlert("Program Kerja baru berhasil ditambahkan!");
+        } else {
+          prokersData[idx] = newProker;
+          triggerAlert("Program Kerja berhasil diperbarui!");
+        }
+
+        localStorage.setItem("KKN_PROKERS", JSON.stringify(prokersData));
+        closeProkerCrudModal();
+        initAppElements();
+      }
+
+      function handleDeleteProker(idx) {
+        const confirmDelete = confirm(
+          `Apakah Anda yakin ingin menghapus proker "${prokersData[idx].title}"?`
+        );
+        if (confirmDelete) {
+          prokersData.splice(idx, 1);
+          localStorage.setItem("KKN_PROKERS", JSON.stringify(prokersData));
+          triggerAlert("Program Kerja berhasil dihapus.");
+          initAppElements();
+        }
+      }
+
+      // ================= SISTEM DESA LOGIC (REQUEST LETTER, ASPIRATIONS, & INFONEWS) =================
+      function handleRequestLetter(e) {
+        e.preventDefault();
+        const nama = document.getElementById("suratNama").value.trim();
+        const nik = document.getElementById("suratNik").value.trim();
+        const jenis = document.getElementById("suratJenis").value;
+
+        const newRequest = {
+          id: Date.now(),
+          nama: nama,
+          nik: nik,
+          jenis: jenis,
+          status: "Pending",
+        };
+
+        suratRequests.push(newRequest);
+        localStorage.setItem(
+          "KKN_SURAT_REQUESTS",
+          JSON.stringify(suratRequests)
+        );
+        triggerAlert(
+          "Pengajuan surat Anda berhasil dikirim ke server Balai Desa!"
+        );
+        document.getElementById("suratForm").reset();
+        renderSuratRequests();
+      }
+
+      function renderSuratRequests() {
+        const container = document.getElementById("listSuratRequests");
+        container.innerHTML = "";
+
+        suratRequests.forEach((req, idx) => {
+          const statusColor =
+            req.status === "Disetujui"
+              ? "text-emerald-600 bg-emerald-50"
+              : req.status === "Ditolak"
+              ? "text-red-600 bg-red-50"
+              : "text-amber-600 bg-amber-50";
+
+          const adminActions = isAdmin
+            ? `
+                    <div class="flex gap-1 mt-2">
+                        <button onclick="updateSuratStatus(${idx}, 'Disetujui')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] px-2 py-1 rounded transition-all">Setujui</button>
+                        <button onclick="updateSuratStatus(${idx}, 'Ditolak')" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[9px] px-2 py-1 rounded transition-all">Tolak</button>
+                        <button onclick="deleteSuratRequest(${idx})" class="bg-slate-500 hover:bg-slate-600 text-white font-bold text-[9px] px-2 py-1 rounded transition-all">Hapus</button>
+                    </div>
+                `
+            : "";
+
+          const item = `
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-bold text-slate-800">${req.jenis}</p>
+                                <p class="text-[10px] text-slate-500">Pemohon: ${req.nama} (${req.nik})</p>
+                            </div>
+                            <span class="px-2 py-1 rounded text-[9px] font-bold ${statusColor}">${req.status}</span>
+                        </div>
+                        ${adminActions}
+                    </div>
+                `;
+          container.innerHTML += item;
+        });
+      }
+
+      function updateSuratStatus(idx, newStatus) {
+        suratRequests[idx].status = newStatus;
+        localStorage.setItem(
+          "KKN_SURAT_REQUESTS",
+          JSON.stringify(suratRequests)
+        );
+        triggerAlert(
+          `Status surat pemohon ${suratRequests[idx].nama} berhasil diperbarui.`
+        );
+        renderSuratRequests();
+      }
+
+      function deleteSuratRequest(idx) {
+        suratRequests.splice(idx, 1);
+        localStorage.setItem(
+          "KKN_SURAT_REQUESTS",
+          JSON.stringify(suratRequests)
+        );
+        triggerAlert("Data pengajuan dihapus.");
+        renderSuratRequests();
+      }
+
+      function handleSubmitAspiration(e) {
+        e.preventDefault();
+        const nama = document.getElementById("aspirasiNama").value.trim();
+        const kategori = document.getElementById("aspirasiKategori").value;
+        const isi = document.getElementById("aspirasiIsi").value.trim();
+
+        const newAspirasi = {
+          id: Date.now(),
+          nama: nama,
+          isi: `[${kategori}] - ${isi}`,
+          tanggapan: "",
+        };
+
+        aspirasiList.push(newAspirasi);
+        localStorage.setItem("KKN_ASPIRASI", JSON.stringify(aspirasiList));
+        triggerAlert(
+          "Aspirasi/Aduan Anda berhasil terkirim. Terima kasih atas partisipasinya!"
+        );
+        document.getElementById("aspirasiForm").reset();
+        renderAspirasi();
+      }
+
+      function renderAspirasi() {
+        const container = document.getElementById("listAspirasi");
+        container.innerHTML = "";
+
+        aspirasiList.forEach((asp, idx) => {
+          const adminResponseForm = isAdmin
+            ? `
+                    <div class="mt-2 flex gap-1">
+                        <input type="text" id="replyField-${idx}" class="flex-grow bg-white border border-slate-200 rounded p-1 text-[10px] focus:outline-none" placeholder="Tulis tanggapan kades/admin...">
+                        <button onclick="saveAspirasiReply(${idx})" class="bg-teal-900 hover:bg-teal-800 text-white text-[9px] font-bold px-2 py-1 rounded transition-all">Balas</button>
+                        <button onclick="deleteAspirasi(${idx})" class="bg-red-600 hover:bg-red-700 text-white text-[9px] font-bold px-2 py-1 rounded transition-all">Hapus</button>
+                    </div>
+                `
+            : "";
+
+          const replyBox = asp.tanggapan
+            ? `
+                    <div class="bg-teal-50 border-l-2 border-teal-700 p-2 rounded-r mt-2 text-[10px]">
+                        <p class="font-bold text-teal-900">Tanggapan Perangkat:</p>
+                        <p class="text-slate-700">${asp.tanggapan}</p>
+                    </div>
+                `
+            : "";
+
+          const item = `
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                        <p class="font-bold text-slate-800">${asp.nama}</p>
+                        <p class="text-slate-600 mt-1">${asp.isi}</p>
+                        ${replyBox}
+                        ${adminResponseForm}
+                    </div>
+                `;
+          container.innerHTML += item;
+        });
+      }
+
+      // ================= BERITA & PENGUMUMAN LOGIC (NEW) =================
+      function renderBerita() {
+        const grid = document.getElementById("beritaGrid");
+        grid.innerHTML = "";
+
+        beritaData.forEach((b, idx) => {
+          const categoryBadgeColor =
+            b.kategori === "Berita"
+              ? "bg-teal-100 text-teal-800"
+              : b.kategori === "Pengumuman"
+              ? "bg-red-100 text-red-800"
+              : "bg-amber-100 text-amber-800";
+
+          const adminControls = isAdmin
+            ? `
+                    <div class="mt-4 pt-2 border-t border-slate-100 text-right">
+                        <button onclick="handleDeleteBerita(${idx})" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[9px] px-2 py-1 rounded transition-all">Hapus Info</button>
+                    </div>
+                `
+            : "";
+
+          const card = `
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 hover:shadow-sm transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="px-2.5 py-1 rounded-full text-[9px] font-bold tracking-wider uppercase ${categoryBadgeColor}">${
+            b.kategori
+          }</span>
+                                <span class="text-[10px] text-slate-400 font-semibold">${formatDateIndo(
+                                  b.tanggal
+                                )}</span>
+                            </div>
+                            <h4 class="font-bold text-slate-800 text-sm mb-2">${
+                              b.title
+                            }</h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">${
+                              b.isi
+                            }</p>
+                        </div>
+                        ${adminControls}
+                    </div>
+                `;
+          grid.innerHTML += card;
+        });
+      }
+
+      function openAddBeritaModal() {
+        document.getElementById("beritaCrudForm").reset();
+        document.getElementById("beritaCrudModal").classList.remove("hidden");
+      }
+
+      function closeAddBeritaModal() {
+        document.getElementById("beritaCrudModal").classList.add("hidden");
+      }
+
+      function saveBerita(e) {
+        e.preventDefault();
+        const newBerita = {
+          id: Date.now(),
+          kategori: document.getElementById("beritaKategori").value,
+          title: document.getElementById("beritaTitle").value,
+          isi: document.getElementById("beritaIsi").value,
+          tanggal: document.getElementById("beritaTanggal").value,
+        };
+
+        beritaData.push(newBerita);
+        localStorage.setItem("KKN_BERITA", JSON.stringify(beritaData));
+        triggerAlert("Informasi / Agenda baru berhasil diterbitkan!");
+        closeAddBeritaModal();
+        renderBerita();
+      }
+
+      function handleDeleteBerita(idx) {
+        const confirmDelete = confirm(
+          `Apakah Anda yakin ingin menghapus pengumuman "${beritaData[idx].title}"?`
+        );
+        if (confirmDelete) {
+          beritaData.splice(idx, 1);
+          localStorage.setItem("KKN_BERITA", JSON.stringify(beritaData));
+          triggerAlert("Informasi berhasil dihapus.");
+          renderBerita();
+        }
+      }
+
+      // ================= GALERI RENDERING & CRUD =================
+      function renderGaleri() {
+        const grid = document.getElementById("galeriGrid");
+        grid.innerHTML = "";
+
+        galeriData.forEach((img, idx) => {
+          const adminControls = isAdmin
+            ? `
+                    <div class="mt-2 text-right">
+                        <button onclick="handleDeleteGaleri(${idx})" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all">Hapus Foto</button>
+                    </div>
+                `
+            : "";
+
+          const card = `
+                    <div class="bg-white p-3 rounded-2xl shadow-sm border border-stone-100">
+                        <div class="h-60 overflow-hidden rounded-xl bg-slate-100 mb-3">
+                            <img src="${img.url}" alt="${img.title}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1544650031-7e6bbee88efb?auto=format&fit=crop&q=80&w=800'">
+                        </div>
+                        <h4 class="font-bold text-slate-800 text-sm">${img.title}</h4>
+                        <p class="text-xs text-slate-500 mt-1">${img.desc}</p>
+                        ${adminControls}
+                    </div>
+                `;
+          grid.innerHTML += card;
+        });
+      }
+
+      function openAddGaleriModal() {
+        document.getElementById("galeriCrudForm").reset();
+        document.getElementById("galeriCrudModal").classList.remove("hidden");
+      }
+
+      function closeGaleriCrudModal() {
+        document.getElementById("galeriCrudModal").classList.add("hidden");
+      }
+
+      function saveGaleri(e) {
+        e.preventDefault();
+        const newImg = {
+          title: document.getElementById("galeriTitle").value,
+          desc: document.getElementById("galeriDesc").value,
+          url: document.getElementById("galeriUrl").value,
+        };
+
+        galeriData.push(newImg);
+        localStorage.setItem("KKN_GALERI", JSON.stringify(galeriData));
+        triggerAlert("Dokumentasi baru berhasil ditambahkan!");
+        closeGaleriCrudModal();
+        renderGaleri();
+      }
+
+      function handleDeleteGaleri(idx) {
+        const confirmDelete = confirm(
+          `Apakah Anda yakin ingin menghapus foto "${galeriData[idx].title}"?`
+        );
+        if (confirmDelete) {
+          galeriData.splice(idx, 1);
+          localStorage.setItem("KKN_GALERI", JSON.stringify(galeriData));
+          triggerAlert("Dokumentasi berhasil dihapus.");
+          renderGaleri();
+        }
+      }
+
+      // ================= INITIAL LOAD TRIGGER =================
+      window.onload = function () {
+        checkAuthState();
+      };
+    </script>
+  </body>
+</html>
